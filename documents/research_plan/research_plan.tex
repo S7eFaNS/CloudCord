@@ -1,0 +1,216 @@
+
+\documentclass[12pt]{report}
+\usepackage[backref=page]{hyperref}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{adjustbox}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, arrows, shapes.geometric}
+\usepackage{array}
+\geometry{a4paper, margin=1in}
+\graphicspath{{images/}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={Project Plan},
+    pdfpagemode=FullScreen,
+}
+
+\tikzstyle{start} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=green!45]
+\tikzstyle{stop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!45]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=cyan!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=purple!20]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    literate=
+        *{0}{{{\color{blue}0}}}{1}
+         {1}{{{\color{blue}1}}}{1}
+         {2}{{{\color{blue}2}}}{1}
+         {3}{{{\color{blue}3}}}{1}
+         {4}{{{\color{blue}4}}}{1}
+         {5}{{{\color{blue}5}}}{1}
+         {6}{{{\color{blue}6}}}{1}
+         {7}{{{\color{blue}7}}}{1}
+         {8}{{{\color{blue}8}}}{1}
+         {9}{{{\color{blue}9}}}{1}
+}
+
+\lstdefinelanguage{json}{
+  basicstyle=\ttfamily,
+  morestring=[b]",
+  moredelim=**[is][\color{red}]{\%\%}{\%\%},
+  morekeywords={true,false,null}
+}
+
+
+\author{Stefan-Nikola Stanev}
+\title{CloudCord - Research Plan}
+
+\date{2024}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+
+\chapter{Problem}
+
+In today’s digital landscape, real-time communication platforms like Discord and Slack are essential for both enterprise and community collaboration. However, existing solutions often face scalability issues, security vulnerabilities, and limited cloud-native integration. Enterprises require a highly available, secure, and scalable communication system that supports text, voice, and video while ensuring compliance with security best practices (e.g., OWASP, GDPR) and seamless DevOps integration.
+
+CloudCord addresses these challenges by leveraging microservices, cloud-native deployment, and real-time data processing to create a reliable, secure, and scalable communication platform tailored for enterprise use.
+
+
+\chapter{Opportunity}
+
+With the growing demand for secure, scalable, and cloud-native communication platforms, there is an opportunity to build a modern alternative that integrates real-time messaging, voice, and video while ensuring enterprise-level security, compliance, and DevOps automation.
+
+CloudCord offers a flexible, self-hosted, and cloud-integrated solution that can scale dynamically, meet strict security standards (e.g., OWASP, GDPR), and provide high availability through microservices and Kubernetes. By focusing on cloud-native best practices, distributed architecture, and CI/CD automation, CloudCord positions itself as an enterprise-ready alternative to existing platforms, catering to both businesses and communities.
+
+
+\chapter{Research questions}
+
+\section{Main question}
+
+How can a cloud-native, microservices-based Discord-like platform be designed and implemented to ensure scalability, security, and real-time performance for enterprise use?
+
+\section{Sub-Questions}
+
+\begin{enumerate}
+
+\item \textbf{Scalability:} What architectural patterns and cloud-native technologies can be used to ensure high availability and scalability in a microservices-based platform?
+
+\item \textbf{DevOps:} How can CI/CD, infrastructure as code, and monitoring ensure reliable deployment, scalability and maintainability for CloudCord?
+
+\item \textbf{Cloud Native:} How can CloudCord use cloud-native technologies to improve scalability, reliability, and cost efficiency?
+
+\item \textbf{Security:} How can CloudCord integrate security best practices, such as authentication, encryption, and OWASP Top 10 mitigation, to protect user data and minimize vulnerabilities?
+
+\item \textbf{Distributed Data:} How can CloudCord securely handle and store data while ensuring GDPR compliance and protecting sensitive information?
+  
+\end{enumerate}
+
+
+\chapter{Research Methods}
+
+
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|p{5cm}|p{3cm}|p{3cm}|p{3cm}|}
+		\hline
+		\textbf{Research Sub-Question} & \textbf{Library Research} & \textbf{Field Research} & \textbf{Workshop Research} \\ \hline
+		Scalability       & Review scalability principles & Test scalability in real environments & Design scalable architecture \\ \hline
+		DevOps             & Study DevOps tools and practices & Observe DevOps in production & Design CI/CD pipelines and tools \\ \hline
+		Cloud Native      & Review cloud-native principles & Test cloud technologies in real environments & Prototype cloud-native solutions \\ \hline
+		Security          & Study security best practices & Test security in real systems & Design security measures and prototypes \\ \hline
+    	Distributed Data  & Review data storage solutions & Test data storage and compliance & Prototype data storage solutions \\ \hline
+	\end{tabular}
+	\caption{Research Methods for Each Research Sub-Question}
+\end{table}
+
+
+
+
+
+\chapter{Deliverables}
+
+\begin{enumerate}
+
+	\item\textbf{\large{Enterprise software solution}}
+    
+  \begin{enumerate}
+
+    \item[] Software solution integrating cloud concepts and best practices for enterprise software 
+    
+  \end{enumerate}
+
+	\item\textbf{\large{Documentation}}
+
+    \begin{enumerate}
+
+		\item Research plan
+
+		\item Portfolio
+
+		\item Other documents in the future
+
+	\end{enumerate}
+
+
+\end{enumerate}
+
+
+
+
+\chapter{Planning}
+
+\section*{Sprint 1: Research and Initial Design (Weeks 1-3)}
+\begin{itemize}
+    \item Research plan
+    \item Initial design documentation, including architecture diagram and selected tools/technologies.
+    \item Non-functional and functional requirements for CloudCord.
+\end{itemize}
+
+\section*{Sprint 2: Local Kubernetes Setup, Microservices, and Portfolio (Weeks 4-6)}
+\begin{itemize}
+    \item Local Kubernetes setup and configuration.
+    \item Initial microservices (user authentication, basic functionality).
+    \item Portfolio documentation with progress so far.
+\end{itemize}
+
+\section*{Sprint 3: Security, Additional Microservices, CI/CD, and Portfolio (Weeks 7-9)}
+\begin{itemize}
+    \item Security implementation (authentication, encryption, OAuth).
+    \item Additional microservices integrated into the system.
+    \item Working CI/CD pipeline (with automated testing).
+    \item Portfolio with added security features and CI/CD documentation.
+\end{itemize}
+
+\section*{Sprint 4: Distributed Data, Final Microservices, and Portfolio (Weeks 10-12)}
+\begin{itemize}
+    \item Distributed data management features (e.g., cloud storage, data replication).
+    \item Final microservices integrated into the platform.
+    \item Cloud-native integrations (e.g., Kubernetes).
+    \item Portfolio with detailed implementation of distributed data and final microservices.
+\end{itemize}
+
+\section*{Sprint 5: Deployment, Scalability, and Portfolio (Weeks 13-15)}
+\begin{itemize}
+    \item Cloud deployment of CloudCord platform.
+    \item Scalability and performance testing results.
+    \item Updated portfolio with deployment and scalability insights.
+\end{itemize}
+
+\section*{Sprint 6: Final Solution, Presentation, and Final Portfolio (Weeks 16-18)}
+\begin{itemize}
+    \item Fully deployed and functional CloudCord platform.
+    \item Final project report and presentation.
+    \item Completed and polished portfolio with all documentation, research, design, and results.
+\end{itemize}
+
+
+
+\end{document}
+
+
+
