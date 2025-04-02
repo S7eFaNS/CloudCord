@@ -1,0 +1,25 @@
+services:
+  user_api:
+    build:
+      context: ./user_api
+      dockerfile: Dockerfile
+      network: host
+    ports:
+      - "8081:8081"
+
+  file_storage_api:
+    build:
+      context: ./file_storage_api
+      dockerfile: Dockerfile
+      network: host
+    ports:
+      - "8082:8082"
+
+  notification_api:
+    build:
+      context: ./notification_api
+      dockerfile: Dockerfile
+      network: host
+    ports:
+      - "8083:8083"
+
