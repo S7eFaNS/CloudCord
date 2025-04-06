@@ -15,7 +15,6 @@ func handleOK(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handleOK) // 200 Ok
-
 	fmt.Println("Starting server on :8082...")
 	http.ListenAndServe(":8082", nil)
 	log.Fatal(http.ListenAndServe(":8082", nil))
