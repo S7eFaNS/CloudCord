@@ -20,3 +20,42 @@ services:
     ports:
       - "8083:8083"
 
+  loki:
+    image: grafana/loki:3.2.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./log-collector/config.yaml:/etc/loki/config.yaml
+    command: -config.file=/etc/loki/config.yaml
+      - config.expand-env=true
+
+
+  promtail:
+    image: grafana/promtail:3.2.0
+    ports:
+      - "9080:9080"
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./log-collector/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - loki
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./log-collector/grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
+
