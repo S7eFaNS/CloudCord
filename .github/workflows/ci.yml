@@ -2,9 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
     branches: [main]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
 
 jobs:
   build-services:
