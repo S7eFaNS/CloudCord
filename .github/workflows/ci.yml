@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-services:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build user_api
+        run: docker build -t user_api ./user_api
+
+      - name: Build file_storage_api
+        run: docker build -t file_storage_api ./file_storage_api
+
+      - name: Build notification_api
+        run: docker build -t notification_api ./notification_api
