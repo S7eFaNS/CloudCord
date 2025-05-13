@@ -1,10 +1,28 @@
 services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   user_api:
     build:
       context: ./user_api
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
+    env_file:
+      - ./user_api/.env
+    depends_on:
+      - postgres
 
   file_storage_api:
     build:
@@ -20,6 +38,13 @@ services:
     ports:
       - "8083:8083"
 
+  chat_api:
+    build:
+      context: ./chat_api
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+ 
   loki:
     image: grafana/loki:3.2.0
     ports:
@@ -57,3 +82,4 @@ services:
 
 volumes:
   grafana-storage:
+  postgres_data:
