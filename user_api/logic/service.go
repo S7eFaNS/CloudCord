@@ -33,3 +33,13 @@ func (ul *UserLogic) GetUserByIDHandler(id uint) (*models.User, error) {
 	log.Printf("Retrieved user: %v", user)
 	return user, nil
 }
+
+func (ul *UserLogic) GetAllUsersHandler() ([]models.User, error) {
+	users, err := ul.repo.GetAllUsers()
+	if err != nil {
+		log.Printf("Error retrieving all users: %v", err)
+		return nil, err
+	}
+	log.Printf("Success retrieving all users: %v", users)
+	return users, nil
+}
