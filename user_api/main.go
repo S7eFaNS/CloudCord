@@ -114,6 +114,4 @@ func main() {
 	fmt.Println("Starting server on :8081...")
 
 	http.ListenAndServe(":8081", nil)
-
-	log.Fatal(http.ListenAndServe(":8081", nil))
 }
