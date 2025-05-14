@@ -38,7 +38,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=s7efans \
+            -Dsonar.projectKey=Stefan-Nikola_CloudCord \
             -Dsonar.organization=Stefan-Nikola \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
