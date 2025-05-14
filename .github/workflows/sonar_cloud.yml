@@ -40,6 +40,8 @@ jobs:
           sonar-scanner \
             -Dsonar.projectKey=S7eFaNS_CloudCord \
             -Dsonar.organization=s7efans \
+            -Dsonar.exclusions=frontend/**/* \
+            -Dsonar.coverage.exclusions=frontend/**/* \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
