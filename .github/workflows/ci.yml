@@ -23,5 +23,8 @@ jobs:
       - name: Build file_storage_api
         run: docker build -t file_storage_api ./file_storage_api
 
+      - name: Build chat_api
+        run: docker build -t chat_api ./chat_api
+
       - name: Build notification_api
         run: docker build -t notification_api ./notification_api
