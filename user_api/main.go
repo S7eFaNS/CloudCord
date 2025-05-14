@@ -79,6 +79,23 @@ func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userLogic := logic.NewUserLogic(db.NewRepository(db.DB))
+	users, err := userLogic.GetAllUsersHandler()
+	if err != nil {
+		http.Error(w, "Could not retrieve users", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
 func main() {
 	db.Connect()
 
@@ -92,6 +109,7 @@ func main() {
 	http.HandleFunc("/", handleOK)               // 200 Ok
 	http.HandleFunc("/create", handleCreateUser) // Endpoint to create a user
 	http.HandleFunc("/user", handleGetUserByID)  // GetUserByUserId endpoint
+	http.HandleFunc("/users", handleGetAllUsers)
 
 	fmt.Println("Starting server on :8081...")
 

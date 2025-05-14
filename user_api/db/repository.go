@@ -30,3 +30,14 @@ func (r *Repository) GetUserByID(id uint) (*models.User, error) {
 	log.Printf("Success getting user by id")
 	return &user, nil
 }
+
+func (r *Repository) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+	result := r.DB.Find(&users)
+	if result.Error != nil {
+		log.Printf("Error retrieving users: %v", result.Error)
+		return nil, result.Error
+	}
+	log.Printf("Successfully retrieved all users")
+	return users, nil
+}
