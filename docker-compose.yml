@@ -45,6 +45,16 @@ services:
     ports:
       - "8084:8084"
  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80" 
+    depends_on:
+      - user_api
+    restart: always
+
   loki:
     image: grafana/loki:3.2.0
     ports:
@@ -69,7 +79,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - loki
     environment:
