@@ -3,6 +3,7 @@ package main
 import (
 	"cloudcord/user/db"
 	"cloudcord/user/logic"
+	"cloudcord/user/middleware"
 	"cloudcord/user/models"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func handleOK(w http.ResponseWriter, r *http.Request) {
@@ -21,27 +24,30 @@ func handleOK(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreateUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	claims, ok := r.Context().Value(middleware.UserContextKey).(jwt.MapClaims)
+	if !ok || claims == nil {
+		http.Error(w, "Unauthorized: no valid token claims found", http.StatusUnauthorized)
 		return
 	}
 
-	var userRequest struct {
-		Username string `json:"username"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&userRequest)
-	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	auth0ID, ok := claims["sub"].(string)
+	if !ok || auth0ID == "" {
+		http.Error(w, "Invalid token: sub claim missing", http.StatusUnauthorized)
 		return
 	}
 
-	userLogic := logic.NewUserLogic(db.NewRepository(db.DB)) // Using the repository injected into logic
-	userLogic.CreateUserHandler(userRequest.Username)
+	nickname, _ := claims["nickname"].(string)
+	if nickname == "" {
+		nickname = "unknown"
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	response := map[string]string{"message": "User created successfully", "username": userRequest.Username}
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message":  "User processed successfully",
+		"auth0ID":  auth0ID,
+		"username": nickname,
+	})
 }
 
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
@@ -96,8 +102,27 @@ func handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func withCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	db.Connect()
+
+	repo := db.NewRepository(db.DB)
+	middleware.InitMiddleware(repo)
 
 	err := models.MigrateUsers(db.DB)
 	if err != nil {
@@ -106,10 +131,10 @@ func main() {
 
 	log.Println("Database migrated successfully")
 
-	http.HandleFunc("/", handleOK)               // 200 Ok
-	http.HandleFunc("/create", handleCreateUser) // Endpoint to create a user
-	http.HandleFunc("/user", handleGetUserByID)  // GetUserByUserId endpoint
-	http.HandleFunc("/users", handleGetAllUsers)
+	http.Handle("/", middleware.ValidateJWT(http.HandlerFunc(handleOK)))
+	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
+	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
+	http.Handle("/users", middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers)))
 
 	fmt.Println("Starting server on :8081...")
 

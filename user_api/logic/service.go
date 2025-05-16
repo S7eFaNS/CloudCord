@@ -14,14 +14,24 @@ func NewUserLogic(repo *db.Repository) *UserLogic {
 	return &UserLogic{repo: repo}
 }
 
-func (ul *UserLogic) CreateUserHandler(username string) {
-	user := &models.User{Username: username}
-	err := ul.repo.CreateUser(user)
+func (ul *UserLogic) CreateUserIfNotExists(auth0ID, username string) error {
+	user, err := ul.repo.GetUserByAuth0ID(auth0ID)
+	if err == nil && user != nil {
+		log.Printf("User with Auth0ID %s already exists", auth0ID)
+		return nil
+	}
+
+	user = &models.User{
+		Auth0ID:  auth0ID,
+		Username: username,
+	}
+	err = ul.repo.CreateUser(user)
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
-		return
+		return err
 	}
-	log.Println("User created successfully")
+	log.Printf("User created successfully: %v", user)
+	return nil
 }
 
 func (ul *UserLogic) GetUserByIDHandler(id uint) (*models.User, error) {

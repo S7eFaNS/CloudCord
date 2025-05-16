@@ -14,7 +14,8 @@ root.render(
     domain={domain}
     clientId={clientId}
     authorizationParams={{
-      redirect_uri: window.location.origin
+      redirect_uri: window.location.origin,
+      audience: "https://cloudcord/api",
     }}
     cacheLocation="localstorage"
     useRefreshTokens={true}

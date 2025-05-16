@@ -31,6 +31,18 @@ func (r *Repository) GetUserByID(id uint) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *Repository) GetUserByAuth0ID(auth0ID string) (*models.User, error) {
+	var user models.User
+	result := r.DB.Where("auth0_id = ?", auth0ID).First(&user)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func (r *Repository) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	result := r.DB.Find(&users)
