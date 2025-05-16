@@ -24,26 +24,14 @@ services:
     depends_on:
       - postgres
 
-  file_storage_api:
-    build:
-      context: ./file_storage_api
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-
-  notification_api:
-    build:
-      context: ./notification_api
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
-
   chat_api:
     build:
       context: ./chat_api
       dockerfile: Dockerfile
     ports:
       - "8084:8084"
+    env_file:
+      - ./chat_api/.env
  
   frontend:
     build:
