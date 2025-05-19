@@ -25,7 +25,7 @@ jobs:
           go-version: '1.20'
 
       - name: Run Snyk test on React frontend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: test
           path: ./frontend
@@ -33,7 +33,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk test on user_api backend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: test
           path: ./user_api
@@ -41,7 +41,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk test on chat_api backend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: test
           path: ./chat_api
@@ -49,7 +49,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Monitor React frontend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: monitor
           path: ./frontend
@@ -57,7 +57,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Monitor user_api backend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: monitor
           path: ./user_api
@@ -65,7 +65,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Monitor chat_api backend
-        uses: snyk/actions@v2
+        uses: snyk/actions@v1
         with:
           command: monitor
           path: ./chat_api
