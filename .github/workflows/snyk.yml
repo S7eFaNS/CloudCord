@@ -38,3 +38,20 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+      
+      - name: Snyk Code - Scan frontend
+        run: snyk code test --path=./frontend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+
+      - name: Snyk Code - Scan chat_api
+        run: snyk code test --path=./chat_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Code - Scan user_api
+        run: snyk code test --path=./user_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
