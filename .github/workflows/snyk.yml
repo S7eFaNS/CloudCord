@@ -44,9 +44,18 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+      - name: Snyk Code - Monitor frontend
+        run: snyk code monitor --path=./frontend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Code - Scan chat_api
         run: snyk code test --path=./chat_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Code - Monitor chat_api
+        run: snyk code monitor --path=./chat_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -55,3 +64,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+      - name: Snyk Code - Monitor user_api
+        run: snyk code monitor --path=./user_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
