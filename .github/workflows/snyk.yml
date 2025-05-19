@@ -24,50 +24,49 @@ jobs:
         with:
           go-version: '1.20'
 
-      - name: Run Snyk test on React frontend
-        uses: snyk/actions@v1
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@v1
         with:
-          command: test
+          version: 'latest'
+
+      - name: Run Snyk test on React frontend
+        uses: snyk/actions/test@v1
+        with:
           path: ./frontend
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Run Snyk test on user_api backend
-        uses: snyk/actions@v1
+      - name: Run Snyk test on Go backend user_api
+        uses: snyk/actions/test@v1
         with:
-          command: test
           path: ./user_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Run Snyk test on chat_api backend
-        uses: snyk/actions@v1
+      - name: Run Snyk test on Go backend chat_api
+        uses: snyk/actions/test@v1
         with:
-          command: test
           path: ./chat_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Monitor React frontend
-        uses: snyk/actions@v1
+        uses: snyk/actions/monitor@v1
         with:
-          command: monitor
           path: ./frontend
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Monitor user_api backend
-        uses: snyk/actions@v1
+      - name: Monitor Go backend user_api
+        uses: snyk/actions/monitor@v1
         with:
-          command: monitor
           path: ./user_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Monitor chat_api backend
-        uses: snyk/actions@v1
+      - name: Monitor Go backend chat_api
+        uses: snyk/actions/monitor@v1
         with:
-          command: monitor
           path: ./chat_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
