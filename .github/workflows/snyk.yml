@@ -1,0 +1,94 @@
+name: Snyk Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js (for React frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Go (for Go services)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.1'
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+        with:
+          version: 'latest'
+
+      - name: Run Snyk test on all projects
+        run: snyk test --all-projects || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor all projects with Snyk
+        run: snyk monitor --all-projects
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      
+      - name: Snyk Code - Scan frontend
+        run: snyk code test --path=./frontend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Code - Scan chat_api
+        run: snyk code test --path=./chat_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Code - Scan user_api
+        run: snyk code test --path=./user_api
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build frontend Docker image
+        run: docker build -t frontend-image ./frontend
+
+      - name: Scan frontend Docker image with Snyk
+        run: snyk container test frontend-image || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor frontend Docker image with Snyk
+        run: snyk container monitor frontend-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build chat_api Docker image
+        run: docker build -t chat-api-image ./chat_api
+
+      - name: Scan chat_api Docker image with Snyk
+        run: snyk container test chat-api-image || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor chat_api Docker image with Snyk
+        run: snyk container monitor chat-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build user_api Docker image
+        run: docker build -t user-api-image ./user_api
+
+      - name: Scan user_api Docker image with Snyk
+        run: snyk container test user-api-image || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor user_api Docker image with Snyk
+        run: snyk container monitor user-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
