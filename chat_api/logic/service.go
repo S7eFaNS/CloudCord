@@ -16,20 +16,22 @@ func NewChatService(repo *db.ChatRepository) *ChatService {
 	return &ChatService{repo: repo}
 }
 
-func (s *ChatService) CreateChatWithMessage(ctx context.Context, user1, user2 string, content string) error {
-	users := []string{user1, user2}
+func (s *ChatService) SendMessageToUser(ctx context.Context, sender, receiver, content string) error {
+	users := []string{sender, receiver}
 	sort.Strings(users)
 
 	message := models.Message{
 		Content:    content,
-		SentByUser: user1,
+		SentByUser: sender,
 		Timestamp:  time.Now(),
 	}
 
-	chat := &models.Chat{
-		Users:    users,
-		Messages: []models.Message{message},
-	}
+	return s.repo.AddMessageToChat(ctx, users, message)
+}
 
-	return s.repo.CreateChat(ctx, chat)
+func (s *ChatService) GetChatByUsers(ctx context.Context, user1, user2 string) (*models.Chat, error) {
+	users := []string{user1, user2}
+	sort.Strings(users)
+
+	return s.repo.GetChatByUsers(ctx, users)
 }
