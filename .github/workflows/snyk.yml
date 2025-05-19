@@ -54,11 +54,6 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk Code - Monitor user_api
-        run: snyk code monitor --all-projects
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
       - name: Build frontend Docker image
         run: docker build -t frontend-image ./frontend
 
