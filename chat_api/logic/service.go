@@ -33,3 +33,16 @@ func (s *ChatService) CreateChatWithMessage(ctx context.Context, user1, user2 st
 
 	return s.repo.CreateChat(ctx, chat)
 }
+
+func (s *ChatService) SendMessageToUser(ctx context.Context, sender, receiver, content string) error {
+	users := []string{sender, receiver}
+	sort.Strings(users)
+
+	message := models.Message{
+		Content:    content,
+		SentByUser: sender,
+		Timestamp:  time.Now(),
+	}
+
+	return s.repo.AddMessageToChat(ctx, users, message)
+}

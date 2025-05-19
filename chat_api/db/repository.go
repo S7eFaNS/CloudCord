@@ -36,3 +36,22 @@ func (r *ChatRepository) DeleteChat(ctx context.Context, chatID string) error {
 	_, err := r.collection.DeleteOne(ctx, bson.M{"chat_id": chatID})
 	return err
 }
+
+func (r *ChatRepository) AddMessageToChat(ctx context.Context, users []string, message models.Message) error {
+	filter := bson.M{"users": users}
+
+	update := bson.M{
+		"$push": bson.M{"messages": message},
+	}
+
+	result := r.collection.FindOneAndUpdate(ctx, filter, update)
+	if result.Err() == mongo.ErrNoDocuments {
+		chat := &models.Chat{
+			Users:    users,
+			Messages: []models.Message{message},
+		}
+		_, err := r.collection.InsertOne(ctx, chat)
+		return err
+	}
+	return result.Err()
+}

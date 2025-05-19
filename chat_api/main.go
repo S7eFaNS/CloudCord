@@ -22,6 +22,12 @@ type createChatRequest struct {
 	Content string `json:"content"`
 }
 
+type sendMessageRequest struct {
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
+	Content  string `json:"content"`
+}
+
 func chatHandler(chatLogic *logic.ChatService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -49,6 +55,33 @@ func chatHandler(chatLogic *logic.ChatService) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(`{"message":"chat created"}`))
+	}
+}
+
+func sendMessageHandler(chatLogic *logic.ChatService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req sendMessageRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		err := chatLogic.SendMessageToUser(ctx, req.Sender, req.Receiver, req.Content)
+		if err != nil {
+			http.Error(w, "Failed to send message: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"message":"message sent"}`))
 	}
 }
 
@@ -89,6 +122,7 @@ func main() {
 	chatService := logic.NewChatService(chatRepo)
 
 	http.HandleFunc("/chat", chatHandler(chatService))
+	http.HandleFunc("/send", sendMessageHandler(chatService))
 
 	http.ListenAndServe(":8084", nil)
 }
