@@ -68,3 +68,42 @@ jobs:
         run: snyk code monitor --path=./user_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build frontend Docker image
+        run: docker build -t frontend-image ./frontend
+
+      - name: Scan frontend Docker image with Snyk
+        run: snyk container test frontend-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor frontend Docker image with Snyk
+        run: snyk container monitor frontend-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build chat_api Docker image
+        run: docker build -t chat-api-image ./chat_api
+
+      - name: Scan chat_api Docker image with Snyk
+        run: snyk container test chat-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor chat_api Docker image with Snyk
+        run: snyk container monitor chat-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build user_api Docker image
+        run: docker build -t user-api-image ./user_api
+
+      - name: Scan user_api Docker image with Snyk
+        run: snyk container test user-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Monitor user_api Docker image with Snyk
+        run: snyk container monitor user-api-image
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
