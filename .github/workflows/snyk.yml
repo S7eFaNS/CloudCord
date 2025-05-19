@@ -8,30 +8,33 @@ on:
 jobs:
   snyk:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Run Snyk test on React frontend
-        uses: snyk/actions/node@master
+      - name: Set up Node.js (for React frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Go (for Go services)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+        with:
+          version: 'latest'
+
+      - name: Run Snyk test on all projects
+        run: snyk test --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-        working-directory: ./frontend
 
-      - name: Run Snyk test on Go backend user_api
-        uses: snyk/actions/golang@master
+      - name: Monitor all projects with Snyk
+        run: snyk monitor --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-        working-directory: ./user_api
-
-      - name: Run Snyk test on Go backend chat_api
-        uses: snyk/actions/golang@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-        working-directory: ./chat_api
 
