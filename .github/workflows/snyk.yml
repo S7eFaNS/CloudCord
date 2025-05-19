@@ -13,21 +13,25 @@ jobs:
 
       - name: Run Snyk test on React frontend
         uses: snyk/actions/node@master
-        with:
-          path: ./frontend
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+        working-directory: ./frontend
 
       - name: Run Snyk test on Go backend user_api
         uses: snyk/actions/golang@master
-        with:
-          path: ./user_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+        working-directory: ./user_api
 
       - name: Run Snyk test on Go backend chat_api
         uses: snyk/actions/golang@master
-        with:
-          path: ./chat_api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+        working-directory: ./chat_api
+
