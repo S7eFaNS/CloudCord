@@ -12,3 +12,8 @@ type Chat struct {
 	Users    []string  `bson:"users" json:"users"`
 	Messages []Message `bson:"messages" json:"messages"`
 }
+
+type MessageNotification struct {
+	ReceiverID string `json:"receiver_id"`
+	Message    string `json:"message"`
+}

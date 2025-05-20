@@ -8,6 +8,8 @@ services:
       - "8081:8081"
     env_file:
       - ./user_api/.env
+    depends_on:
+      - rabbitmq
 
   chat_api:
     build:
@@ -17,6 +19,19 @@ services:
       - "8084:8084"
     env_file:
       - ./chat_api/.env
+    depends_on:
+      - rabbitmq
+
+  notification_api:
+    build:
+      context: ./notification_api
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    env_file:
+      - ./notification_api/.env
+    depends_on:
+      - rabbitmq
  
   frontend:
     build:
@@ -27,6 +42,16 @@ services:
     depends_on:
       - user_api
     restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   
+      - "15672:15672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
   loki:
     image: grafana/loki:3.2.0
