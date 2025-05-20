@@ -3,6 +3,7 @@ package main
 import (
 	"cloudcord/chat/db"
 	"cloudcord/chat/logic"
+	"cloudcord/chat/mq"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -118,7 +119,28 @@ func main() {
 
 	chatRepo := db.NewChatRepository(mongoDB)
 
-	chatService := logic.NewChatService(chatRepo)
+	var publisher *mq.Publisher
+	var err2 error
+	rabbitURI := os.Getenv("RABBITMQ_URI")
+	if rabbitURI == "" {
+		log.Fatal("RabbitMQ path not set in environment")
+	}
+
+	for i := 0; i < 8; i++ {
+		publisher, err2 = mq.NewPublisher(rabbitURI, "message_notifications")
+		if err2 == nil {
+			log.Println("✅ RabbitMQ publisher set up successfully")
+			break
+		}
+		log.Printf("Attempt %d: Failed to set up RabbitMQ publisher: %v", i+1, err2)
+		time.Sleep(3 * time.Second)
+	}
+
+	if err2 != nil {
+		log.Fatalf("Failed to set up RabbitMQ publisher after retries: %v", err2)
+	}
+
+	chatService := logic.NewChatService(chatRepo, publisher)
 
 	http.HandleFunc("/send", sendMessageHandler(chatService))
 	http.HandleFunc("/chat", getChatHandler(chatService))

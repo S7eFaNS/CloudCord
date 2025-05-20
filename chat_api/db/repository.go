@@ -13,12 +13,14 @@ type ChatRepository struct {
 	collection *mongo.Collection
 }
 
+// constructor
 func NewChatRepository(db *mongo.Database) *ChatRepository {
 	return &ChatRepository{
 		collection: db.Collection("chats"),
 	}
 }
 
+// add message to chat
 func (r *ChatRepository) AddMessageToChat(ctx context.Context, users []string, message models.Message) error {
 	filter := bson.M{"users": users}
 
@@ -38,6 +40,7 @@ func (r *ChatRepository) AddMessageToChat(ctx context.Context, users []string, m
 	return result.Err()
 }
 
+// Get the chat between two users
 func (r *ChatRepository) GetChatByUsers(ctx context.Context, users []string) (*models.Chat, error) {
 	sort.Strings(users)
 
