@@ -107,9 +107,9 @@ func ValidateJWT(next http.Handler) http.Handler {
 
 		nickname, _ := claims["nickname"].(string)
 
-		fmt.Printf("Token claims: %+v\n", claims)
+		ctx := r.Context()
 
-		user, err := repo.GetUserByAuth0ID(auth0ID)
+		user, err := repo.GetUserByAuth0ID(ctx, auth0ID)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
@@ -120,14 +120,14 @@ func ValidateJWT(next http.Handler) http.Handler {
 				Auth0ID:  auth0ID,
 				Username: nickname,
 			}
-			err = repo.CreateUser(newUser)
+			err = repo.CreateUser(ctx, newUser)
 			if err != nil {
 				http.Error(w, "Error creating user", http.StatusInternalServerError)
 				return
 			}
 		}
 
-		ctx := context.WithValue(r.Context(), UserContextKey, claims)
+		ctx = context.WithValue(ctx, UserContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
