@@ -32,6 +32,7 @@ func main() {
 	var err error
 	maxRetries := 8
 
+	// retry logic
 	for i := 0; i < maxRetries; i++ {
 		conn, err = amqp.Dial(rabbitURI)
 		if err == nil {

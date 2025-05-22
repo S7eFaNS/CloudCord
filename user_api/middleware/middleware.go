@@ -41,6 +41,7 @@ func InitMiddleware(r *db.Repository) {
 	}
 }
 
+// validation of JWT tokens
 func ValidateJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
