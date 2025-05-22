@@ -20,6 +20,14 @@ func handleOK(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	go func() {
+		fmt.Println("Starting metrics server on :2112...")
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":2112", nil); err != nil {
+			fmt.Printf("Metrics server error: %v\n", err)
+		}
+	}()
+
 	http.HandleFunc("/", handleOK)
 
 	fmt.Println("Starting server on :8083...")
@@ -89,16 +97,6 @@ func main() {
 
 	log.Println("Waiting for messages...")
 	<-forever
-
-	go func() {
-		fmt.Println("Starting metrics server on :2112...")
-		http.Handle("/metrics", promhttp.Handler())
-		if err := http.ListenAndServe(":2112", nil); err != nil {
-			fmt.Printf("Metrics server error: %v\n", err)
-		}
-	}()
-
-	http.ListenAndServe(":8083", nil)
 
 	log.Fatal(http.ListenAndServe(":8083", nil))
 }
