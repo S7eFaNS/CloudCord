@@ -18,6 +18,7 @@ WORKDIR /app
 COPY --from=builder /notification /notification
 
 EXPOSE 8083
+EXPOSE 2112
 
 CMD ["/notification"]
 

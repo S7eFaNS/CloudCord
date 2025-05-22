@@ -19,6 +19,7 @@ COPY --from=builder /chat /chat
 
 
 EXPOSE 8084
+EXPOSE 2112
 
 CMD ["/chat"]
 

@@ -6,6 +6,11 @@ spec:
   selector:
     app: chat-api
   ports:
-  - port: 8084
-    targetPort: 8084
+    - name: http
+      protocol: TCP
+      port: 8084
+      targetPort: 8084
+    - name: metrics
+      port: 2112
+      targetPort: 2112
   type: ClusterIP

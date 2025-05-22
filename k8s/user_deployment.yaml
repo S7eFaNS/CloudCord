@@ -17,6 +17,9 @@ spec:
           image: s7efan/user-api:latest
           ports:
             - containerPort: 8081
+              name: http
+            - containerPort: 2112
+              name: metrics
           env:
             - name: DB_HOST
               value: "users-cloudcord.h.aivencloud.com"

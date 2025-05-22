@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func handleOK(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +24,7 @@ func handleOK(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// user create api
 func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	claims, ok := r.Context().Value(middleware.UserContextKey).(jwt.MapClaims)
 	if !ok || claims == nil {
@@ -50,6 +52,7 @@ func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// user get by userid
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -138,6 +141,14 @@ func main() {
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
 	http.Handle("/users", middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers)))
+
+	go func() {
+		fmt.Println("Starting metrics server on :2112...")
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":2112", nil); err != nil {
+			fmt.Printf("Metrics server error: %v\n", err)
+		}
+	}()
 
 	fmt.Println("Starting server on :8081...")
 
