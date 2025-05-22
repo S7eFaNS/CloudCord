@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -145,6 +146,14 @@ func main() {
 
 	http.HandleFunc("/send", sendMessageHandler(chatService))
 	http.HandleFunc("/chat", getChatHandler(chatService))
+
+	go func() {
+		fmt.Println("Starting metrics server on :2112...")
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":2112", nil); err != nil {
+			fmt.Printf("Metrics server error: %v\n", err)
+		}
+	}()
 
 	http.ListenAndServe(":8084", nil)
 }

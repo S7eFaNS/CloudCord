@@ -19,6 +19,9 @@ spec:
           image: s7efan/chat-api:latest
           ports:
             - containerPort: 8084
+              name: http
+            - containerPort: 2112
+              name: metrics
           env:
             - name: RABBITMQ_URI
               valueFrom:

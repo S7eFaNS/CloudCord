@@ -19,6 +19,7 @@ COPY --from=builder /user /user
 
 
 EXPOSE 8081
+EXPOSE 2112
 
 CMD ["/user"]
 

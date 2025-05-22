@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func handleOK(w http.ResponseWriter, r *http.Request) {
@@ -140,6 +141,14 @@ func main() {
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
 	http.Handle("/users", middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers)))
+
+	go func() {
+		fmt.Println("Starting metrics server on :2112...")
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":2112", nil); err != nil {
+			fmt.Printf("Metrics server error: %v\n", err)
+		}
+	}()
 
 	fmt.Println("Starting server on :8081...")
 

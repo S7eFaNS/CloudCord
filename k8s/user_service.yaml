@@ -6,7 +6,11 @@ spec:
   selector:
     app: user-api
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8081
+    - name: metrics
+      port: 2112
+      targetPort: 2112
   type: ClusterIP
