@@ -55,6 +55,7 @@ func sendMessageHandler(chatLogic *logic.ChatService) http.HandlerFunc {
 	}
 }
 
+// get chat by two users
 func getChatHandler(chatLogic *logic.ChatService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
