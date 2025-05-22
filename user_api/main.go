@@ -23,6 +23,7 @@ func handleOK(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// user create api
 func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	claims, ok := r.Context().Value(middleware.UserContextKey).(jwt.MapClaims)
 	if !ok || claims == nil {
@@ -50,6 +51,7 @@ func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// user get by userid
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)

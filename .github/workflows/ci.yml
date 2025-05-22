@@ -34,7 +34,7 @@ jobs:
       - name: Build and push user_api
         run: |
           docker build -t $DOCKERHUB_USERNAME/user-api:latest ./user_api
-          docker push $DOCKERHUB_USERNAME/user_api:latest
+          docker push $DOCKERHUB_USERNAME/user-api:latest
 
 #      - name: Build and push file_storage_api
 #        run: |
@@ -44,9 +44,9 @@ jobs:
       - name: Build and push chat_api
         run: |
           docker build -t $DOCKERHUB_USERNAME/chat-api:latest ./chat_api
-          docker push $DOCKERHUB_USERNAME/chat_api:latest
+          docker push $DOCKERHUB_USERNAME/chat-api:latest
 
       - name: Build and push notification_api
         run: |
           docker build -t $DOCKERHUB_USERNAME/notification-api:latest ./notification_api
-          docker push $DOCKERHUB_USERNAME/notification_api:latest
+          docker push $DOCKERHUB_USERNAME/notification-api:latest
