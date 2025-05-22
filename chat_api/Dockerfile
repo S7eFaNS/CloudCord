@@ -1,4 +1,3 @@
-
 FROM golang:1.24.1 AS builder
 
 WORKDIR /chat_api
