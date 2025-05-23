@@ -1,16 +1,22 @@
 package logic
 
 import (
-	"cloudcord/user/db"
 	"cloudcord/user/models"
 	"log"
 )
 
-type UserLogic struct {
-	repo *db.Repository
+type UserRepository interface {
+	GetUserByAuth0ID(auth0ID string) (*models.User, error)
+	CreateUser(user *models.User) error
+	GetUserByID(id uint) (*models.User, error)
+	GetAllUsers() ([]models.User, error)
 }
 
-func NewUserLogic(repo *db.Repository) *UserLogic {
+type UserLogic struct {
+	repo UserRepository
+}
+
+func NewUserLogic(repo UserRepository) *UserLogic {
 	return &UserLogic{repo: repo}
 }
 
