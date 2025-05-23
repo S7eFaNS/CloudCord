@@ -1,22 +1,31 @@
 package logic
 
 import (
-	"cloudcord/chat/db"
 	"cloudcord/chat/models"
-	"cloudcord/chat/mq"
 	"context"
 	"log"
 	"sort"
 	"time"
 )
 
-type ChatService struct {
-	repo      *db.ChatRepository
-	publisher *mq.Publisher
+// Define interfaces for dependency inversion
+type ChatRepository interface {
+	AddMessageToChat(ctx context.Context, users []string, message models.Message) error
+	GetChatByUsers(ctx context.Context, users []string) (*models.Chat, error)
 }
 
-// constructor
-func NewChatService(repo *db.ChatRepository, publisher *mq.Publisher) *ChatService {
+type Publisher interface {
+	Publish(msg interface{}) error
+}
+
+// ChatService depends on interfaces, not concrete types
+type ChatService struct {
+	repo      ChatRepository
+	publisher Publisher
+}
+
+// Constructor takes interfaces now
+func NewChatService(repo ChatRepository, publisher Publisher) *ChatService {
 	return &ChatService{
 		repo:      repo,
 		publisher: publisher,

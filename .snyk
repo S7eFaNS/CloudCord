@@ -1,0 +1,4 @@
+code:
+  exclude:
+    - user_api/tests/**
+    - chat_api/tests/**

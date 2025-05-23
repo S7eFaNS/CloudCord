@@ -26,6 +26,17 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      - name: Run Go tests with coverage
+        run: |
+          cd user_api
+          go test -coverprofile=../user_coverage.out ./...
+          cd ../chat_api
+          go test -coverprofile=../chat_coverage.out ./...
+          cd ..
+          echo "mode: set" > coverage.out
+          tail -n +2 user_coverage.out >> coverage.out
+          tail -n +2 chat_coverage.out >> coverage.out
+
       - name: Install SonarScanner
         run: |
           npm install -g sonarqube-scanner
@@ -40,5 +51,6 @@ jobs:
             -Dsonar.exclusions=frontend/**/* \
             -Dsonar.coverage.exclusions=frontend/**/* \
             -Dsonar.sources=. \
+            -Dsonar.go.coverage.reportPaths=coverage.out \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
