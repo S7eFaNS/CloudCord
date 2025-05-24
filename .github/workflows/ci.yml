@@ -29,47 +29,66 @@ jobs:
         working-directory: ./chat_api
         run: |
           go test ./... -v -cover
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+build:
+  runs-on: ubuntu-latest
+  needs: test
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Run unit tests for user_api
-        working-directory: ./user_api
-        run: |
-          go test ./... -v -cover
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Build frontend image
+      run: docker build -t frontend:latest ./frontend
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ env.DOCKERHUB_TOKEN }}
+    - name: Build user_api image
+      run: docker build -t user-api:latest ./user_api
 
-      - name: Build and push frontend
-        run: |
-          docker build -t $DOCKERHUB_USERNAME/frontend:latest ./frontend
-          docker push $DOCKERHUB_USERNAME/frontend:latest
+    - name: Build chat_api image
+      run: docker build -t chat-api:latest ./chat_api
 
-      - name: Build and push user_api
-        run: |
-          docker build -t $DOCKERHUB_USERNAME/user-api:latest ./user_api
-          docker push $DOCKERHUB_USERNAME/user-api:latest
+    - name: Build notification_api image
+      run: docker build -t notification-api:latest ./notification_api
 
-      - name: Build and push chat_api
-        run: |
-          docker build -t $DOCKERHUB_USERNAME/chat-api:latest ./chat_api
-          docker push $DOCKERHUB_USERNAME/chat-api:latest
+deployment:
+  runs-on: ubuntu-latest
+  needs: build
+  env:
+    DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+    DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push notification_api
-        run: |
-          docker build -t $DOCKERHUB_USERNAME/notification-api:latest ./notification_api
-          docker push $DOCKERHUB_USERNAME/notification-api:latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.DOCKERHUB_USERNAME }}
+        password: ${{ env.DOCKERHUB_TOKEN }}
+
+    - name: Tag and push frontend image
+      run: |
+        docker tag frontend:latest $DOCKERHUB_USERNAME/frontend:latest
+        docker push $DOCKERHUB_USERNAME/frontend:latest
+
+    - name: Tag and push user_api image
+      run: |
+        docker tag user-api:latest $DOCKERHUB_USERNAME/user-api:latest
+        docker push $DOCKERHUB_USERNAME/user-api:latest
+
+    - name: Tag and push chat_api image
+      run: |
+        docker tag chat-api:latest $DOCKERHUB_USERNAME/chat-api:latest
+        docker push $DOCKERHUB_USERNAME/chat-api:latest
+
+    - name: Tag and push notification_api image
+      run: |
+        docker tag notification-api:latest $DOCKERHUB_USERNAME/notification-api:latest
+        docker push $DOCKERHUB_USERNAME/notification-api:latest
+
