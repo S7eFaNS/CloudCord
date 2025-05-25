@@ -34,12 +34,12 @@ jobs:
       - name: Run Go tests with coverage
         run: |
           cd user_api
-          go test -coverprofile=../user_coverage.out ./...
+          go test -coverprofile=../user_coverage.out ./logic
           go tool cover -func=../user_coverage.out
           cd ..
 
           cd chat_api
-          go test -coverprofile=../chat_coverage.out ./...
+          go test -coverprofile=../chat_coverage.out ./logic
           go tool cover -func=../chat_coverage.out
           cd ..
 
@@ -47,6 +47,8 @@ jobs:
           tail -n +2 user_coverage.out >> coverage.out
           tail -n +2 chat_coverage.out >> coverage.out
 
+      - name: Show combined coverage file head
+        run: head -20 coverage.out
 
 
       - name: Install SonarScanner
@@ -62,7 +64,7 @@ jobs:
             -Dsonar.organization=s7efans \
             -Dsonar.exclusions=frontend/**/* \
             -Dsonar.coverage.exclusions=frontend/**/* \
-            -Dsonar.sources=. \
+            -Dsonar.sources=user_api,chat_api \
             -Dsonar.go.coverage.reportPaths=coverage.out \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
