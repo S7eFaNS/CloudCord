@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"cloudcord/user/models"
+	"cloudcord/user_api/models"
 	"log"
 )
 

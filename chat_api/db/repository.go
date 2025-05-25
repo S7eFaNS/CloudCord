@@ -1,7 +1,7 @@
 package db
 
 import (
-	"cloudcord/chat/models"
+	"cloudcord/chat_api/models"
 	"context"
 	"sort"
 

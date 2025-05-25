@@ -64,7 +64,9 @@ jobs:
             -Dsonar.organization=s7efans \
             -Dsonar.exclusions=frontend/**/* \
             -Dsonar.coverage.exclusions=frontend/**/* \
-            -Dsonar.sources=user_api,chat_api \
+            -Dsonar.sources=user_api/logic,chat_api/logic \
+            -Dsonar.tests=user_api/logic,chat_api/logic \
+            -Dsonar.test.inclusions=**/*_test.go \
             -Dsonar.go.coverage.reportPaths=coverage.out \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN

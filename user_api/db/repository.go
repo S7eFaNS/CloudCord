@@ -1,7 +1,7 @@
 package db
 
 import (
-	"cloudcord/user/models"
+	"cloudcord/user_api/models"
 	"log"
 
 	"gorm.io/gorm"

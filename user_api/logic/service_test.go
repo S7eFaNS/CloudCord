@@ -1,8 +1,8 @@
 package logic_test
 
 import (
-	"cloudcord/user/logic"
-	"cloudcord/user/models"
+	"cloudcord/user_api/logic"
+	"cloudcord/user_api/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

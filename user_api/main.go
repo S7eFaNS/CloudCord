@@ -1,10 +1,10 @@
 package main
 
 import (
-	"cloudcord/user/db"
-	"cloudcord/user/logic"
-	"cloudcord/user/middleware"
-	"cloudcord/user/models"
+	"cloudcord/user_api/db"
+	"cloudcord/user_api/logic"
+	"cloudcord/user_api/middleware"
+	"cloudcord/user_api/models"
 	"encoding/json"
 	"fmt"
 	"log"

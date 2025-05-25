@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"cloudcord/user/db"
-	"cloudcord/user/models"
+	"cloudcord/user_api/db"
+	"cloudcord/user_api/models"
 	"context"
 	"fmt"
 	"net/http"
