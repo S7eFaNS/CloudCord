@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"cloudcord/chat/models"
+	"cloudcord/chat_api/models"
 	"context"
 	"log"
 	"sort"

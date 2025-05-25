@@ -1,4 +1,4 @@
-module cloudcord/chat
+module cloudcord/chat_api
 
 go 1.24.1
 

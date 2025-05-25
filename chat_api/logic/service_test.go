@@ -1,8 +1,8 @@
 package logic_test
 
 import (
-	"cloudcord/chat/logic"
-	"cloudcord/chat/models"
+	"cloudcord/chat_api/logic"
+	"cloudcord/chat_api/models"
 	"context"
 	"sort"
 	"testing"

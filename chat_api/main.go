@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cloudcord/chat/db"
-	"cloudcord/chat/logic"
-	"cloudcord/chat/mq"
+	"cloudcord/chat_api/db"
+	"cloudcord/chat_api/logic"
+	"cloudcord/chat_api/mq"
 	"context"
 	"encoding/json"
 	"fmt"

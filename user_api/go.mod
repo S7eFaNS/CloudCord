@@ -1,4 +1,4 @@
-module cloudcord/user
+module cloudcord/user_api
 
 go 1.24.1
 
