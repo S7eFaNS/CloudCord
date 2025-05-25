@@ -30,14 +30,18 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
 
+
       - name: Run Go tests with coverage
         run: |
-          go test -coverprofile=user_api_coverage.out ./user_api/...
-          go test -coverprofile=chat_api_coverage.out ./chat_api/...
-
+          cd user_api
+          go test -coverprofile=../user_coverage.out ./...
+          cd ../chat_api
+          go test -coverprofile=../chat_coverage.out ./...
+          cd ..
           echo "mode: set" > coverage.out
-          tail -n +2 user_api_coverage.out >> coverage.out
-          tail -n +2 chat_api_coverage.out >> coverage.out
+          tail -n +2 user_coverage.out >> coverage.out
+          tail -n +2 chat_coverage.out >> coverage.out
+
 
 
       - name: Install SonarScanner
