@@ -66,5 +66,7 @@ jobs:
             -Dsonar.coverage.exclusions=frontend/**/* \
             -Dsonar.sources=user_api/logic,chat_api/logic \
             -Dsonar.tests=user_api/logic,chat_api/logic \
+            -Dsonar.exclusions=**/*_test.go \
+            -Dsonar.test.inclusions=**/*_test.go \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
