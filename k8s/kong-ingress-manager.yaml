@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-manager-ingress
+  namespace: kong
+  annotations:
+    konghq.com/strip-path: "true"
+    konghq.com/protocols: "https"
+    konghq.com/https-redirect-status-code: "426"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - admin.cloudcord.com
+      secretName: admin-tls
+  rules:
+    - host: admin.cloudcord.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kong-kong-manager
+                port:
+                  number: 8445

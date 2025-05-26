@@ -7,6 +7,8 @@ const Home = () => {
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [apiResponse, setApiResponse] = useState('');
 
+  //const apiDevUrl = 'http://localhost:8081';
+  const apiProdUrl = 'https://cloudcord.com/user';
   // Use a ref to track if we've already called the backend after login
   const calledBackendAfterLogin = useRef(false);
 
@@ -15,12 +17,13 @@ const Home = () => {
       try {
         const token = await getAccessTokenSilently();
         console.log('Access Token:', token); 
-
-        const response = await fetch('http://localhost:8081/create', {
+        
+        const response = await fetch(`${apiProdUrl}/create`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          credentials: 'include',
         });
 
         if (!response.ok) {
