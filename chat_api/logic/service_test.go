@@ -27,6 +27,12 @@ func (m *MockRepo) GetChatByUsers(ctx context.Context, users []string) (*models.
 	return chat, args.Error(1)
 }
 
+func (m *MockRepo) CreateChat(ctx context.Context, users []string) (*models.Chat, error) {
+	args := m.Called(ctx, users)
+	chat, _ := args.Get(0).(*models.Chat)
+	return chat, args.Error(1)
+}
+
 type MockPublisher struct {
 	mock.Mock
 }
@@ -175,6 +181,55 @@ func TestGetChatByUsers_RepoFails(t *testing.T) {
 	mockRepo.On("GetChatByUsers", ctx, users).Return(nil, assert.AnError)
 
 	chat, err := service.GetChatByUsers(ctx, user1, user2)
+
+	assert.Error(t, err)
+	assert.Nil(t, chat)
+	mockRepo.AssertExpectations(t)
+}
+
+// Test successful chat creation
+func TestCreateChat(t *testing.T) {
+	ctx := context.Background()
+	mockRepo := new(MockRepo)
+	mockPub := new(MockPublisher)
+
+	service := logic.NewChatService(mockRepo, mockPub)
+
+	user1 := "alice"
+	user2 := "bob"
+	users := []string{user1, user2}
+	sort.Strings(users)
+
+	expectedChat := &models.Chat{
+		Users:    users,
+		Messages: []models.Message{},
+	}
+
+	mockRepo.On("CreateChat", ctx, users).Return(expectedChat, nil)
+
+	chat, err := service.CreateChat(ctx, user1, user2)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedChat, chat)
+	mockRepo.AssertExpectations(t)
+}
+
+// Test CreateChat failure from repository
+func TestCreateChat_RepoFails(t *testing.T) {
+	ctx := context.Background()
+	mockRepo := new(MockRepo)
+	mockPub := new(MockPublisher)
+
+	service := logic.NewChatService(mockRepo, mockPub)
+
+	user1 := "alice"
+	user2 := "bob"
+	users := []string{user1, user2}
+	sort.Strings(users)
+
+	mockRepo.On("CreateChat", ctx, users).Return(nil, assert.AnError)
+
+	chat, err := service.CreateChat(ctx, user1, user2)
 
 	assert.Error(t, err)
 	assert.Nil(t, chat)
