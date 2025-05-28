@@ -78,13 +78,42 @@ func getChatHandler(chatLogic *logic.ChatService) http.HandlerFunc {
 
 		chat, err := chatLogic.GetChatByUsers(ctx, user1, user2)
 		if err != nil {
-			http.Error(w, "Chat not found: "+err.Error(), http.StatusNotFound)
-			return
+			if err == mongo.ErrNoDocuments {
+				chat, err = chatLogic.CreateChat(ctx, user1, user2)
+				if err != nil {
+					http.Error(w, "Failed to create chat: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+			} else {
+				http.Error(w, "Error retrieving chat: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(chat)
 	}
+}
+
+func withCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+
+		if origin == "http://localhost:3000" || origin == "https://cloudcord.com" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
+
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func main() {
@@ -144,8 +173,8 @@ func main() {
 
 	chatService := logic.NewChatService(chatRepo, publisher)
 
-	http.HandleFunc("/send", sendMessageHandler(chatService))
-	http.HandleFunc("/chat", getChatHandler(chatService))
+	http.Handle("/send", withCORS(sendMessageHandler(chatService)))
+	http.Handle("/chat", withCORS(getChatHandler(chatService)))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

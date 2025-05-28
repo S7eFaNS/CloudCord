@@ -145,7 +145,7 @@ func main() {
 	http.Handle("/", middleware.ValidateJWT(http.HandlerFunc(handleOK)))
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
-	http.Handle("/users", middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers)))
+	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

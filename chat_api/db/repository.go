@@ -51,3 +51,20 @@ func (r *ChatRepository) GetChatByUsers(ctx context.Context, users []string) (*m
 	}
 	return &chat, nil
 }
+
+// Create new chat for existing users
+func (r *ChatRepository) CreateChat(ctx context.Context, users []string) (*models.Chat, error) {
+	sort.Strings(users)
+
+	chat := &models.Chat{
+		Users:    users,
+		Messages: []models.Message{},
+	}
+
+	_, err := r.collection.InsertOne(ctx, chat)
+	if err != nil {
+		return nil, err
+	}
+
+	return chat, nil
+}

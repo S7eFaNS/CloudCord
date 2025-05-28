@@ -27,6 +27,12 @@ func (m *MockRepo) GetChatByUsers(ctx context.Context, users []string) (*models.
 	return chat, args.Error(1)
 }
 
+func (m *MockRepo) CreateChat(ctx context.Context, users []string) (*models.Chat, error) {
+	args := m.Called(ctx, users)
+	chat, _ := args.Get(0).(*models.Chat)
+	return chat, args.Error(1)
+}
+
 type MockPublisher struct {
 	mock.Mock
 }

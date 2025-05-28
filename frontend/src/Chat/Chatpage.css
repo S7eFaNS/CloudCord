@@ -58,3 +58,9 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.timestamp {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 5px;
+}

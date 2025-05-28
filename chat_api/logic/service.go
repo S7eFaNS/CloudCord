@@ -12,6 +12,7 @@ import (
 type ChatRepository interface {
 	AddMessageToChat(ctx context.Context, users []string, message models.Message) error
 	GetChatByUsers(ctx context.Context, users []string) (*models.Chat, error)
+	CreateChat(ctx context.Context, users []string) (*models.Chat, error)
 }
 
 type Publisher interface {
@@ -66,4 +67,11 @@ func (s *ChatService) GetChatByUsers(ctx context.Context, user1, user2 string) (
 	sort.Strings(users)
 
 	return s.repo.GetChatByUsers(ctx, users)
+}
+
+func (s *ChatService) CreateChat(ctx context.Context, user1, user2 string) (*models.Chat, error) {
+	users := []string{user1, user2}
+	sort.Strings(users)
+
+	return s.repo.CreateChat(ctx, users)
 }
