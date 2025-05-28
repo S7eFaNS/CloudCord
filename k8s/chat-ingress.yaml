@@ -10,7 +10,7 @@ spec:
     - host: cloudcord.com
       http:
         paths:
-          - path: /chat
+          - path: /message
             pathType: Prefix
             backend:
               service:
