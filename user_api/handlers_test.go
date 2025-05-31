@@ -4,6 +4,7 @@ import (
 	"cloudcord/user_api/db"
 	"cloudcord/user_api/models"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,9 +14,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found — using environment variables")
 	}
 
 	db.Connect()
