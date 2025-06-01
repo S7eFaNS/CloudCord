@@ -17,6 +17,8 @@ jobs:
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      MONGODB_USER: ${{ secrets.MONGODB_USER }}
+      MONGODB_PASS: ${{ secrets.MONGODB_PASS }}
 
     steps:
       - name: Checkout code
