@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [development]
+    branches: [ci]
   pull_request:
     branches: [main]
 
@@ -10,6 +10,15 @@ jobs:
   test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      MONGODB_USER: ${{ secrets.MONGODB_USER }}
+      MONGODB_PASS: ${{ secrets.MONGODB_PASS }}
 
     steps:
       - name: Checkout code

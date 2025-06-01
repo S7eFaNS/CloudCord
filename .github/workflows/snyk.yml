@@ -1,6 +1,9 @@
 name: Snyk Scan
 
 on:
+  push:
+    branches:
+      - development
   pull_request:
     branches:
       - main

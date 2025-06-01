@@ -11,6 +11,12 @@ type Publisher struct {
 	queue   amqp.Queue
 }
 
+type NoopPublisher struct{}
+
+func (n *NoopPublisher) Publish(msg interface{}) error {
+	return nil
+}
+
 func NewPublisher(amqpURL, queueName string) (*Publisher, error) {
 	conn, err := amqp.Dial(amqpURL)
 	if err != nil {
