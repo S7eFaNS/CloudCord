@@ -101,11 +101,6 @@ func TestGetChatHandler_Integration(t *testing.T) {
 	user1 := "alice_test"
 	user2 := "bob_test"
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, _ = chatService.CreateChat(ctx, user1, user2)
-
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/get?user1=%s&user2=%s", user1, user2), nil)
 	rr := httptest.NewRecorder()
 
@@ -119,5 +114,9 @@ func TestGetChatHandler_Integration(t *testing.T) {
 	var chat models.Chat
 	if err := json.Unmarshal(rr.Body.Bytes(), &chat); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	if chat.Users[0] != user1 && chat.Users[1] != user1 {
+		t.Errorf("Expected user1 to be part of the chat, got: %+v", chat)
 	}
 }
