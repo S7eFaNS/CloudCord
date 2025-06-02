@@ -7,9 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  unit-tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.1'
+
+      - name: Run user_api unit tests
+        working-directory: ./user_api
+        run: go test ./logic/... -v -cover
+
+      - name: Run chat_api unit tests
+        working-directory: ./chat_api
+        run: go test ./logic/... -v -cover
+
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
 
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
@@ -27,20 +49,21 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.1' 
+          go-version: '1.24.1'
 
-      - name: Run unit tests for user_api
+      - name: Run user_api integration tests only
         working-directory: ./user_api
         run: |
-          go test ./... -v -cover
+          go test -tags=integration -v -cover .
 
-      - name: Run tests for chat_api
+      - name: Run chat_api integration tests only
         working-directory: ./chat_api
         run: |
-          go test ./... -v -cover
+          go test -tags=integration -v -cover .
+
   build:
     runs-on: ubuntu-latest
-    needs: test
+    needs: integration-tests
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
