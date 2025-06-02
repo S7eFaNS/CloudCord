@@ -54,12 +54,12 @@ jobs:
       - name: Run user_api integration tests only
         working-directory: ./user_api
         run: |
-          go test -tags=integration -v -cover ./...
+          go test -tags=integration -v -cover .
 
       - name: Run chat_api integration tests only
         working-directory: ./chat_api
         run: |
-          go test -tags=integration -v -cover ./...
+          go test -tags=integration -v -cover .
 
   build:
     runs-on: ubuntu-latest
