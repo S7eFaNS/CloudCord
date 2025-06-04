@@ -61,3 +61,8 @@ func (r *Repository) GetAllUsers() ([]models.User, error) {
 
 	return users, nil
 }
+
+func (r *Repository) DeleteUserByAuth0ID(auth0ID string) error {
+	result := r.DB.Where("auth0_id = ?", auth0ID).Delete(&models.User{})
+	return result.Error
+}

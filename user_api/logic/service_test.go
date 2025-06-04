@@ -45,6 +45,11 @@ func (m *MockUserRepo) GetAllUsers() ([]models.User, error) {
 	return users.([]models.User), args.Error(1)
 }
 
+func (m *MockUserRepo) DeleteUserByAuth0ID(auth0ID string) error {
+	args := m.Called(auth0ID)
+	return args.Error(0)
+}
+
 func TestCreateUserIfNotExists_UserExists(t *testing.T) {
 	mockRepo := new(MockUserRepo)
 	userLogic := logic.NewUserLogic(mockRepo)
