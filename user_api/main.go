@@ -108,6 +108,38 @@ func handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func handleDeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	auth0ID := r.URL.Query().Get("auth0_id")
+	if auth0ID == "" {
+		http.Error(w, "auth0_id is required", http.StatusBadRequest)
+		return
+	}
+
+	userLogic := logic.NewUserLogic(db.NewRepository(db.DB))
+
+	err := userLogic.DeleteUserByAuth0ID(auth0ID)
+	if err != nil {
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+
+	err = middleware.DeleteUserFromAuth0(auth0ID)
+	if err != nil {
+		fmt.Printf("Failed to delete user from Auth0: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "User deleted successfully",
+	})
+}
+
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -118,7 +150,7 @@ func withCORS(next http.Handler) http.Handler {
 		}
 
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE,OPTIONS")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -146,6 +178,7 @@ func main() {
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
 	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
+	http.Handle("/delete", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleDeleteUser))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")
