@@ -8,6 +8,10 @@ type User struct {
 	Username string `gorm:"type:varchar(100);not null" json:"username"`
 }
 
+type UserDeletedMessage struct {
+	Auth0ID string `json:"auth0_id"`
+}
+
 func MigrateUsers(db *gorm.DB) error {
 	err := db.AutoMigrate(&User{})
 	return err

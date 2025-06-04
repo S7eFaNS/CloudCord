@@ -2,6 +2,7 @@ package logic
 
 import (
 	"cloudcord/user_api/models"
+	"cloudcord/user_api/mq"
 	"log"
 )
 
@@ -14,11 +15,20 @@ type UserRepository interface {
 }
 
 type UserLogic struct {
-	repo UserRepository
+	repo      UserRepository
+	publisher *mq.Publisher
+}
+
+type Publisher interface {
+	Publish(deleteUsr interface{}) error
 }
 
 func NewUserLogic(repo UserRepository) *UserLogic {
 	return &UserLogic{repo: repo}
+}
+
+func NewUserLogicRabbitMQ(repo UserRepository, publisher *mq.Publisher) *UserLogic {
+	return &UserLogic{repo: repo, publisher: publisher}
 }
 
 func (ul *UserLogic) CreateUserIfNotExists(auth0ID, username string) error {
@@ -69,6 +79,19 @@ func (ul *UserLogic) DeleteUserByAuth0ID(auth0ID string) error {
 		log.Printf("Failed to delete user from DB: %v", err)
 		return err
 	}
+
+	if ul.publisher != nil {
+		msg := models.UserDeletedMessage{
+			Auth0ID: auth0ID,
+		}
+		if err := ul.publisher.Publish(msg); err != nil {
+			log.Printf("Failed to publish user deletion message: %v", err)
+			return err
+		} else {
+			log.Printf("Auth0 ID: %s", auth0ID)
+		}
+	}
+
 	log.Printf("Successfully deleted user with Auth0 ID: %s", auth0ID)
 	return nil
 }

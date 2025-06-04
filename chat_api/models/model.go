@@ -17,3 +17,7 @@ type MessageNotification struct {
 	ReceiverID string `json:"receiver_id"`
 	Message    string `json:"message"`
 }
+
+type UserDeletedMessage struct {
+	Auth0ID string `json:"auth0_id"`
+}
