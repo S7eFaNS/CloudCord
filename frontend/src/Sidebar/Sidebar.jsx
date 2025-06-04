@@ -4,6 +4,7 @@ import './Sidebar.css';
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import LogoutButton from '../LogoutButton'; // adjust the path if necessary
+import DeleteButton from '../DeleteButton';
 
   //const apiDevUrl = 'http://localhost:8081';
   const apiProdUrl = 'https://cloudcord.com/user';
@@ -44,6 +45,7 @@ const UserSidebar = () => {
         <div className="userSidebar__topRow">
           <h3>{user?.nickname}</h3>
           <LogoutButton />
+          <DeleteButton />
         </div>
       </div>
 

@@ -10,6 +10,7 @@ type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByID(id uint) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
+	DeleteUserByAuth0ID(auth0ID string) error
 }
 
 type UserLogic struct {
@@ -60,4 +61,14 @@ func (ul *UserLogic) GetAllUsersHandler() ([]models.User, error) {
 	}
 	log.Printf("Success retrieving all users: %v", users)
 	return users, nil
+}
+
+func (ul *UserLogic) DeleteUserByAuth0ID(auth0ID string) error {
+	err := ul.repo.DeleteUserByAuth0ID(auth0ID)
+	if err != nil {
+		log.Printf("Failed to delete user from DB: %v", err)
+		return err
+	}
+	log.Printf("Successfully deleted user with Auth0 ID: %s", auth0ID)
+	return nil
 }

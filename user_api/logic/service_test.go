@@ -45,6 +45,11 @@ func (m *MockUserRepo) GetAllUsers() ([]models.User, error) {
 	return users.([]models.User), args.Error(1)
 }
 
+func (m *MockUserRepo) DeleteUserByAuth0ID(auth0ID string) error {
+	args := m.Called(auth0ID)
+	return args.Error(0)
+}
+
 func TestCreateUserIfNotExists_UserExists(t *testing.T) {
 	mockRepo := new(MockUserRepo)
 	userLogic := logic.NewUserLogic(mockRepo)
@@ -141,5 +146,34 @@ func TestGetAllUsersHandler_Failure(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, users)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDeleteUserByAuth0ID_Success(t *testing.T) {
+	mockRepo := new(MockUserRepo)
+	userLogic := logic.NewUserLogic(mockRepo)
+
+	auth0ID := "auth0|123"
+
+	mockRepo.On("DeleteUserByAuth0ID", auth0ID).Return(nil)
+
+	err := userLogic.DeleteUserByAuth0ID(auth0ID)
+
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDeleteUserByAuth0ID_Failure(t *testing.T) {
+	mockRepo := new(MockUserRepo)
+	userLogic := logic.NewUserLogic(mockRepo)
+
+	auth0ID := "auth0|123"
+
+	mockRepo.On("DeleteUserByAuth0ID", auth0ID).Return(assert.AnError)
+
+	err := userLogic.DeleteUserByAuth0ID(auth0ID)
+
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
 	mockRepo.AssertExpectations(t)
 }

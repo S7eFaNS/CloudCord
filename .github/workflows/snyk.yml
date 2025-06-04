@@ -3,7 +3,7 @@ name: Snyk Scan
 on:
   push:
     branches:
-      - development
+      - ci
   pull_request:
     branches:
       - main
