@@ -54,7 +54,8 @@ func GetManagementToken() (string, error) {
 }
 
 // DeleteUserFromAuth0 deletes a user by Auth0 ID
-func DeleteUserFromAuth0(auth0ID string) error {
+
+var DeleteUserFromAuth0 = func(auth0ID string) error {
 	token, err := GetManagementToken()
 	if err != nil {
 		return err

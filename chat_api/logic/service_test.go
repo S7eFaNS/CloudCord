@@ -33,6 +33,11 @@ func (m *MockRepo) CreateChat(ctx context.Context, users []string) (*models.Chat
 	return chat, args.Error(1)
 }
 
+func (m *MockRepo) DeleteChatsByAuth0ID(ctx context.Context, auth0ID string) error {
+	args := m.Called(ctx, auth0ID)
+	return args.Error(0)
+}
+
 type MockPublisher struct {
 	mock.Mock
 }
@@ -233,5 +238,41 @@ func TestCreateChat_RepoFails(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, chat)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDeleteChatsByAuth0ID(t *testing.T) {
+	ctx := context.Background()
+	mockRepo := new(MockRepo)
+	mockPub := new(MockPublisher)
+
+	service := logic.NewChatService(mockRepo, mockPub)
+
+	auth0ID := "auth0|123456"
+
+	mockRepo.On("DeleteChatsByAuth0ID", ctx, auth0ID).Return(nil)
+
+	err := service.DeleteChatsByAuth0ID(ctx, auth0ID)
+
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+// test delete chat failure
+func TestDeleteChatsByAuth0ID_RepoFails(t *testing.T) {
+	ctx := context.Background()
+	mockRepo := new(MockRepo)
+	mockPub := new(MockPublisher)
+
+	service := logic.NewChatService(mockRepo, mockPub)
+
+	auth0ID := "auth0|fail-case"
+
+	mockRepo.On("DeleteChatsByAuth0ID", ctx, auth0ID).Return(assert.AnError)
+
+	err := service.DeleteChatsByAuth0ID(ctx, auth0ID)
+
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
 	mockRepo.AssertExpectations(t)
 }

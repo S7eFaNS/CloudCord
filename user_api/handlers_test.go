@@ -5,6 +5,7 @@ package main
 
 import (
 	"cloudcord/user_api/db"
+	"cloudcord/user_api/logic"
 	"cloudcord/user_api/middleware"
 	"cloudcord/user_api/models"
 	"context"
@@ -126,7 +127,7 @@ func TestHandleCreateUser(t *testing.T) {
 	handler := http.HandlerFunc(handleCreateUser)
 	handler.ServeHTTP(rr, req)
 
-	t.Logf("Response body: %s", rr.Body.String()) // <-- print response body
+	t.Logf("Response body: %s", rr.Body.String())
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("Expected status 200 OK, got %d", rr.Code)
@@ -145,5 +146,37 @@ func TestHandleCreateUser(t *testing.T) {
 	}
 	if resp["message"] != "User processed successfully" {
 		t.Errorf("Expected message 'User processed successfully', got %q", resp["message"])
+	}
+}
+
+func TestDeleteUser_Auth0NotFoundHandledGracefully(t *testing.T) {
+	testUser := &models.User{
+		Auth0ID:  "auth0|missing_in_auth0",
+		Username: "ghost",
+	}
+
+	repo := db.NewRepository(db.DB)
+	err := repo.CreateUser(testUser)
+	if err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	defer db.DB.Unscoped().Delete(&models.User{}, testUser.UserID)
+
+	originalAuth0Delete := middleware.DeleteUserFromAuth0
+	middleware.DeleteUserFromAuth0 = func(auth0ID string) error {
+		return nil
+	}
+	defer func() { middleware.DeleteUserFromAuth0 = originalAuth0Delete }()
+
+	req := httptest.NewRequest(http.MethodDelete, "/delete?auth0_id="+testUser.Auth0ID, nil)
+	rr := httptest.NewRecorder()
+
+	userLogic := logic.NewUserLogic(repo)
+	handler := handleDeleteUser(userLogic)
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("Expected 200 OK, got %d", rr.Code)
 	}
 }
