@@ -171,6 +171,22 @@ func main() {
 		log.Fatalf("Failed to set up RabbitMQ publisher after retries: %v", err2)
 	}
 
+	go func() {
+		maxRetries := 8
+		for i := 0; i < maxRetries; i++ {
+			err := mq.StartUserDeletionConsumer(rabbitURI, "user_deletion", chatRepo)
+			if err == nil {
+				log.Println("✅ User deletion consumer started successfully, listening on RabbitMQ...")
+				return
+			}
+
+			log.Printf("Attempt %d: Failed to start user deletion consumer: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+
+		log.Fatal("❌ Failed to start user deletion consumer after retries")
+	}()
+
 	chatService := logic.NewChatService(chatRepo, publisher)
 
 	http.Handle("/send", withCORS(sendMessageHandler(chatService)))

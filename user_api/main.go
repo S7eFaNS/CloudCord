@@ -5,10 +5,12 @@ import (
 	"cloudcord/user_api/logic"
 	"cloudcord/user_api/middleware"
 	"cloudcord/user_api/models"
+	"cloudcord/user_api/mq"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -108,36 +110,37 @@ func handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func handleDeleteUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
+func handleDeleteUser(userLogic *logic.UserLogic) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		auth0ID := r.URL.Query().Get("auth0_id")
+		if auth0ID == "" {
+			http.Error(w, "auth0_id is required", http.StatusBadRequest)
+			return
+		}
+
+		err := userLogic.DeleteUserByAuth0ID(auth0ID)
+		if err != nil {
+			http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+			return
+		}
+
+		err = middleware.DeleteUserFromAuth0(auth0ID)
+		if err != nil {
+			fmt.Printf("Failed to delete user from Auth0: %v\n", err)
+			http.Error(w, "Failed to delete user from Auth0", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "User deleted successfully",
+		})
 	}
-
-	auth0ID := r.URL.Query().Get("auth0_id")
-	if auth0ID == "" {
-		http.Error(w, "auth0_id is required", http.StatusBadRequest)
-		return
-	}
-
-	userLogic := logic.NewUserLogic(db.NewRepository(db.DB))
-
-	err := userLogic.DeleteUserByAuth0ID(auth0ID)
-	if err != nil {
-		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
-		return
-	}
-
-	err = middleware.DeleteUserFromAuth0(auth0ID)
-	if err != nil {
-		fmt.Printf("Failed to delete user from Auth0: %v\n", err)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "User deleted successfully",
-	})
 }
 
 func withCORS(next http.Handler) http.Handler {
@@ -174,11 +177,34 @@ func main() {
 	}
 	log.Println("Database migrated successfully")
 
+	var publisher *mq.Publisher
+	var err2 error
+	rabbitURI := os.Getenv("RABBITMQ_URI")
+	if rabbitURI == "" {
+		log.Fatal("RabbitMQ path not set in environment")
+	}
+
+	for i := 0; i < 10; i++ {
+		publisher, err2 = mq.NewPublisher(rabbitURI, "user_deletion")
+		if err2 == nil {
+			log.Println("✅ RabbitMQ publisher set up successfully")
+			break
+		}
+		log.Printf("Attempt %d: Failed to set up RabbitMQ publisher: %v", i+1, err2)
+		time.Sleep(3 * time.Second)
+	}
+
+	if err2 != nil {
+		log.Fatalf("Failed to set up RabbitMQ publisher after retries: %v", err2)
+	}
+
+	userLogic := logic.NewUserLogicRabbitMQ(repo, publisher)
+
 	http.Handle("/", middleware.ValidateJWT(http.HandlerFunc(handleOK)))
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
 	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
-	http.Handle("/delete", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleDeleteUser))))
+	http.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

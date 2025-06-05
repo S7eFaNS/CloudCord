@@ -68,3 +68,11 @@ func (r *ChatRepository) CreateChat(ctx context.Context, users []string) (*model
 
 	return chat, nil
 }
+
+func (r *ChatRepository) DeleteChatsByAuth0ID(ctx context.Context, auth0ID string) error {
+	filter := bson.M{
+		"users": auth0ID,
+	}
+	_, err := r.collection.DeleteMany(ctx, filter)
+	return err
+}

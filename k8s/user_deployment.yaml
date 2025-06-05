@@ -55,3 +55,8 @@ spec:
                 secretKeyRef:
                   name: auth0-secret
                   key: AUTH0_DOMAIN
+            - name: RABBITMQ_URI
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_URI

@@ -13,6 +13,7 @@ type ChatRepository interface {
 	AddMessageToChat(ctx context.Context, users []string, message models.Message) error
 	GetChatByUsers(ctx context.Context, users []string) (*models.Chat, error)
 	CreateChat(ctx context.Context, users []string) (*models.Chat, error)
+	DeleteChatsByAuth0ID(ctx context.Context, auth0ID string) error
 }
 
 type Publisher interface {
@@ -74,4 +75,14 @@ func (s *ChatService) CreateChat(ctx context.Context, user1, user2 string) (*mod
 	sort.Strings(users)
 
 	return s.repo.CreateChat(ctx, users)
+}
+
+func (s *ChatService) DeleteChatsByAuth0ID(ctx context.Context, auth0ID string) error {
+	err := s.repo.DeleteChatsByAuth0ID(ctx, auth0ID)
+	if err != nil {
+		log.Printf("Failed to delete chats for user %s: %v", auth0ID, err)
+		return err
+	}
+	log.Printf("Successfully deleted chats for user %s", auth0ID)
+	return nil
 }
