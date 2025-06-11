@@ -65,6 +65,15 @@ func (ul *UserLogic) GetUserByIDHandler(id uint) (*models.User, error) {
 	return user, nil
 }
 
+func (ul *UserLogic) GetUserByAuth0ID(auth0ID string) (*models.User, error) {
+	user, err := ul.repo.GetUserByAuth0ID(auth0ID)
+	if err != nil {
+		log.Printf("Error retrieving user: %v", err)
+		return nil, err
+	}
+	return user, nil
+}
+
 func (ul *UserLogic) GetAllUsersHandler() ([]models.User, error) {
 	users, err := ul.repo.GetAllUsers()
 	if err != nil {

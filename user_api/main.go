@@ -93,6 +93,38 @@ func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func handleGetUserByAuth0ID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	auth0ID := r.URL.Query().Get("auth0_id")
+	if auth0ID == "" {
+		http.Error(w, "auth0_id is required", http.StatusBadRequest)
+		return
+	}
+
+	userLogic := logic.NewUserLogic(db.NewRepository(db.DB))
+
+	user, err := userLogic.GetUserByAuth0ID(auth0ID)
+	if err != nil || user == nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	response := map[string]interface{}{
+		"message":  "User retrieved successfully",
+		"userID":   user.UserID,
+		"username": user.Username,
+		"auth0_id": user.Auth0ID,
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
 func handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -260,6 +292,7 @@ func main() {
 	http.Handle("/", middleware.ValidateJWT(http.HandlerFunc(handleOK)))
 	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
+	http.Handle("/auth-user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByAuth0ID)))
 	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
 	http.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
 	http.Handle("/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
