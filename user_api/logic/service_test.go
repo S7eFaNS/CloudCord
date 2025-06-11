@@ -50,6 +50,16 @@ func (m *MockUserRepo) DeleteUserByAuth0ID(auth0ID string) error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepo) AddFriend(userID, friendID uint) error {
+	args := m.Called(userID, friendID)
+	return args.Error(0)
+}
+
+func (m *MockUserRepo) AreFriends(userID, otherUserID uint) (bool, error) {
+	args := m.Called(userID, otherUserID)
+	return args.Bool(0), args.Error(1)
+}
+
 func TestCreateUserIfNotExists_UserExists(t *testing.T) {
 	mockRepo := new(MockUserRepo)
 	userLogic := logic.NewUserLogic(mockRepo)

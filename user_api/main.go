@@ -143,6 +143,63 @@ func handleDeleteUser(userLogic *logic.UserLogic) http.HandlerFunc {
 	}
 }
 
+func handleAddFriend(userLogic *logic.UserLogic) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		type AddFriendRequest struct {
+			UserID   uint `json:"user_id"`
+			FriendID uint `json:"friend_id"`
+		}
+
+		var req AddFriendRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		if req.UserID == 0 || req.FriendID == 0 {
+			http.Error(w, "Missing user IDs", http.StatusBadRequest)
+			return
+		}
+
+		err := userLogic.AddFriend(req.UserID, req.FriendID)
+		if err != nil {
+			http.Error(w, "Failed to add friend", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Friend added successfully"})
+	}
+}
+
+func handleAreFriends(userLogic *logic.UserLogic) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userIDStr := r.URL.Query().Get("user_id")
+		otherIDStr := r.URL.Query().Get("other_id")
+
+		userID, err1 := strconv.ParseUint(userIDStr, 10, 32)
+		otherID, err2 := strconv.ParseUint(otherIDStr, 10, 32)
+
+		if err1 != nil || err2 != nil || userID == 0 || otherID == 0 {
+			http.Error(w, "Invalid query parameters", http.StatusBadRequest)
+			return
+		}
+
+		areFriends, err := userLogic.AreFriends(uint(userID), uint(otherID))
+		if err != nil {
+			http.Error(w, "Error checking friendship", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]bool{"are_friends": areFriends})
+	}
+}
+
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -171,7 +228,7 @@ func main() {
 
 	middleware.InitMiddleware(repo)
 
-	err := models.MigrateUsers(db.DB)
+	err := models.MigrateAll(db.DB)
 	if err != nil {
 		log.Fatal("could not migrate db")
 	}
@@ -205,6 +262,8 @@ func main() {
 	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
 	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
 	http.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
+	http.Handle("/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
+	http.Handle("/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

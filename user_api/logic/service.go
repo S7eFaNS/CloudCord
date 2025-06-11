@@ -12,6 +12,8 @@ type UserRepository interface {
 	GetUserByID(id uint) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
 	DeleteUserByAuth0ID(auth0ID string) error
+	AddFriend(userID, friendID uint) error
+	AreFriends(userID, otherUserID uint) (bool, error)
 }
 
 type UserLogic struct {
@@ -94,4 +96,28 @@ func (ul *UserLogic) DeleteUserByAuth0ID(auth0ID string) error {
 
 	log.Printf("Successfully deleted user with Auth0 ID: %s", auth0ID)
 	return nil
+}
+
+func (ul *UserLogic) AddFriend(userID, friendID uint) error {
+	if userID == friendID {
+		log.Printf("User %d cannot befriend themselves", userID)
+		return nil
+	}
+
+	err := ul.repo.AddFriend(userID, friendID)
+	if err != nil {
+		log.Printf("Failed to add friend: %v", err)
+		return err
+	}
+	log.Printf("User %d and User %d are now friends", userID, friendID)
+	return nil
+}
+
+func (ul *UserLogic) AreFriends(userID, otherUserID uint) (bool, error) {
+	areFriends, err := ul.repo.AreFriends(userID, otherUserID)
+	if err != nil {
+		log.Printf("Error checking friendship status: %v", err)
+		return false, err
+	}
+	return areFriends, nil
 }
