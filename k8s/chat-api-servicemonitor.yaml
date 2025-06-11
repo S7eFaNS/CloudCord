@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chat-api-servicemonitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: chat-api
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 10s
+

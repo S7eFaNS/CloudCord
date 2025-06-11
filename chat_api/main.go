@@ -12,10 +12,61 @@ import (
 	"os"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var (
+	httpRequestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_requests_total",
+			Help: "Total number of HTTP requests",
+		},
+		[]string{"method", "path", "status"},
+	)
+
+	httpRequestDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "http_request_duration_seconds",
+			Help:    "Duration of HTTP requests in seconds",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"method", "path"},
+	)
+)
+
+func init() {
+	prometheus.MustRegister(httpRequestsTotal)
+	prometheus.MustRegister(httpRequestDuration)
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rw *statusResponseWriter) WriteHeader(code int) {
+	rw.status = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func metricsMiddleware(path string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		srw := &statusResponseWriter{ResponseWriter: w, status: 200}
+
+		next.ServeHTTP(srw, r)
+
+		duration := time.Since(start).Seconds()
+		method := r.Method
+		status := fmt.Sprintf("%d", srw.status)
+
+		httpRequestsTotal.WithLabelValues(method, path, status).Inc()
+		httpRequestDuration.WithLabelValues(method, path).Observe(duration)
+	})
+}
 
 type createChatRequest struct {
 	User1   string `json:"user1"`
@@ -189,8 +240,8 @@ func main() {
 
 	chatService := logic.NewChatService(chatRepo, publisher)
 
-	http.Handle("/send", withCORS(sendMessageHandler(chatService)))
-	http.Handle("/chat", withCORS(getChatHandler(chatService)))
+	http.Handle("/send", metricsMiddleware("/send", withCORS(sendMessageHandler(chatService))))
+	http.Handle("/chat", metricsMiddleware("/chat", withCORS(getChatHandler(chatService))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")
