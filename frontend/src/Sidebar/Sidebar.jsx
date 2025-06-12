@@ -15,6 +15,8 @@ const UserSidebar = () => {
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [friendStatuses, setFriendStatuses] = useState({});
+  const [recommendations, setRecommendations] = useState([]);
+  const [view, setView] = useState('all');
   
   
   useEffect(() => {
@@ -95,6 +97,37 @@ const UserSidebar = () => {
 
     checkFriendshipStatuses();
   }, [currentUserId, users, getAccessTokenSilently]);
+  
+
+const fetchRecommendations = async () => {
+  try {
+    if (!currentUserId) return;
+    const token = await getAccessTokenSilently();
+
+    const response = await fetch(`${apiProdUrl}/recommendations?user_id=${currentUserId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recommendations');
+    }
+
+    const data = await response.json();
+    setRecommendations(data);
+  } catch (error) {
+    console.error('Error fetching recommendations:', error);
+  }
+};
+
+
+const handleToggleView = (viewName) => {
+  setView(viewName);
+  if (viewName === 'recommendations' && recommendations.length === 0) {
+    fetchRecommendations();
+  }
+};
 
   const handleAddFriend = async (friendUserId) => {
     if (!currentUserId) {
@@ -123,7 +156,8 @@ const UserSidebar = () => {
 
       alert('Friend added successfully!');
 
-     setFriendStatuses(prev => ({ ...prev, [friendUserId]: true }));
+      setFriendStatuses(prev => ({ ...prev, [friendUserId]: true }));
+      setRecommendations(prev => prev.filter(rec => rec.ID !== friendUserId));
     } catch (error) {
       console.error('Add friend error:', error);
     }
@@ -139,36 +173,83 @@ const UserSidebar = () => {
         </div>
       </div>
 
-      <div className="userSidebar__list">
-        {users.length === 0 ? (
-          <p>Loading users...</p>
-        ) : (
-          users
-            .filter(u => u.user_id !== currentUserId)
-            .map(u => (
+
+
+
+<div className="toggleButtons">
+  <button
+    className={`toggleButton ${view === 'all' ? 'active' : ''}`}
+    onClick={() => handleToggleView('all')}
+  >
+    All Users
+  </button>
+  <button
+    className={`toggleButton ${view === 'recommendations' ? 'active' : ''}`}
+    onClick={() => handleToggleView('recommendations')}
+  >
+    Recommendations
+  </button>
+</div>
+
+      {view === 'all' && (
+        <div className="userSidebar__list">
+          <h4>All Users</h4>
+          {users.length === 0 ? (
+            <p>Loading users...</p>
+          ) : (
+            users
+              .filter(u => u.user_id !== currentUserId)
+              .map(u => (
+                <div
+                  key={u.user_id}
+                  className="userSidebar__userRow"
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <Link
+                    to={`/chat?user1=${encodeURIComponent(user.sub)}&user2=${encodeURIComponent(u.auth0_id)}`}
+                    className="userSidebar__user"
+                  >
+                    <p>{u.username}</p>
+                  </Link>
+
+                  {friendStatuses[u.user_id] === false ? (
+                    <button onClick={() => handleAddFriend(u.user_id)}>Add Friend</button>
+                  ) : friendStatuses[u.user_id] === true ? (
+                    <span style={{ color: 'green', fontWeight: 'bold' }}>Friend</span>
+                  ) : null}
+                </div>
+              ))
+          )}
+        </div>
+      )}
+
+
+      {view === 'recommendations' && currentUserId && (
+        <div className="userSidebar__recommendations">
+          <h4>Friend Recommendations</h4>
+          {recommendations.length === 0 ? (
+            <p>No recommendations available</p>
+          ) : (
+            recommendations.map(rec => (
               <div
-                key={u.user_id}
+                key={rec.id}
                 className="userSidebar__userRow"
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Link
-                  to={`/chat?user1=${encodeURIComponent(user.sub)}&user2=${encodeURIComponent(u.auth0_id)}`}
-                  className="userSidebar__user"
-                >
-                  <p>{u.username}</p>
-                </Link>
-
-                {friendStatuses[u.user_id] === false ? (
-                  <button onClick={() => handleAddFriend(u.user_id)}>Add Friend</button>
-                ) : friendStatuses[u.user_id] === true ? (
+                <p>{rec.username}</p>
+                {friendStatuses[rec.id] ? (
                   <span style={{ color: 'green', fontWeight: 'bold' }}>Friend</span>
-                ) : null}
+                ) : (
+                  <button onClick={() => handleAddFriend(rec.id)}>Add Friend</button>
+                )}
               </div>
             ))
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default UserSidebar;
