@@ -52,3 +52,64 @@ func CreateFriendship(userID, friendID uint) error {
 	}
 	return nil
 }
+
+type Recommendation struct {
+	UserID            uint
+	MutualFriendCount int
+}
+
+func GetFriendRecommendations(userID uint) ([]Recommendation, error) {
+	ctx := context.Background()
+	session := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	userIDStr := strconv.Itoa(int(userID))
+	recommendations := []Recommendation{}
+
+	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `
+			MATCH (me:User {id: $userID})-[:FRIEND]->(mutual:User)-[:FRIEND]->(recommended:User)
+			WHERE NOT (me)-[:FRIEND]->(recommended)
+			  AND me.id <> recommended.id
+			RETURN recommended.id AS userID, count(mutual) AS mutualFriendCount
+			ORDER BY mutualFriendCount DESC
+			LIMIT 3
+		`
+
+		params := map[string]interface{}{
+			"userID": userIDStr,
+		}
+
+		result, err := tx.Run(ctx, query, params)
+		if err != nil {
+			return nil, err
+		}
+
+		for result.Next(ctx) {
+			record := result.Record()
+			userIDVal, _ := record.Get("userID")
+			mutualCountVal, _ := record.Get("mutualFriendCount")
+
+			uidStr, ok := userIDVal.(string)
+			if !ok {
+				continue
+			}
+			uidInt, err := strconv.Atoi(uidStr)
+			if err != nil {
+				continue
+			}
+			mutualCount, _ := mutualCountVal.(int64)
+
+			recommendations = append(recommendations, Recommendation{
+				UserID:            uint(uidInt),
+				MutualFriendCount: int(mutualCount),
+			})
+		}
+
+		return nil, result.Err()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Neo4j GetFriendRecommendations error: %w", err)
+	}
+	return recommendations, nil
+}

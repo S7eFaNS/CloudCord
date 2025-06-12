@@ -8,6 +8,12 @@ type User struct {
 	Username string `gorm:"type:varchar(100);not null" json:"username"`
 }
 
+type UserRecommendation struct {
+	ID                uint   `json:"id"`
+	Username          string `json:"username"`
+	MutualFriendCount int    `json:"mutualFriendCount"`
+}
+
 type Friendship struct {
 	UserID   uint `gorm:"not null;index:idx_friendship,unique" json:"user_id"`
 	FriendID uint `gorm:"not null;index:idx_friendship,unique" json:"friend_id"`

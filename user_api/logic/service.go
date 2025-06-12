@@ -138,3 +138,35 @@ func (ul *UserLogic) AreFriends(userID, otherUserID uint) (bool, error) {
 	}
 	return areFriends, nil
 }
+
+func (ul *UserLogic) GetFriendRecommendations(userID uint) ([]models.UserRecommendation, error) {
+	_, err := ul.repo.GetUserByID(userID)
+	if err != nil {
+		log.Printf("User %d does not exist or could not be retrieved: %v", userID, err)
+		return nil, err
+	}
+
+	recs, err := graphdb.GetFriendRecommendations(userID)
+	if err != nil {
+		log.Printf("Failed to get friend recommendations from graphdb: %v", err)
+		return nil, err
+	}
+
+	var recommendations []models.UserRecommendation
+
+	for _, rec := range recs {
+		user, err := ul.repo.GetUserByID(rec.UserID)
+		if err != nil {
+			log.Printf("Failed to fetch user %d from PostgreSQL: %v", rec.UserID, err)
+			return nil, err
+		}
+
+		recommendations = append(recommendations, models.UserRecommendation{
+			ID:                user.UserID,
+			Username:          user.Username,
+			MutualFriendCount: rec.MutualFriendCount,
+		})
+	}
+
+	return recommendations, nil
+}

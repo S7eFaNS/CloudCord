@@ -233,6 +233,31 @@ func handleAreFriends(userLogic *logic.UserLogic) http.HandlerFunc {
 	}
 }
 
+func handleFriendRecommendations(userLogic *logic.UserLogic) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		userIDStr := r.URL.Query().Get("user_id")
+		userID, err := strconv.ParseUint(userIDStr, 10, 32)
+		if err != nil || userID == 0 {
+			http.Error(w, "Invalid or missing user_id", http.StatusBadRequest)
+			return
+		}
+
+		recommendations, err := userLogic.GetFriendRecommendations(uint(userID))
+		if err != nil {
+			http.Error(w, "Failed to get recommendations", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(recommendations)
+	}
+}
+
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -304,6 +329,7 @@ func main() {
 	http.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
 	http.Handle("/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
 	http.Handle("/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
+	http.Handle("/recommendations", withCORS(middleware.ValidateJWT(handleFriendRecommendations(userLogic))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")
