@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"cloudcord/user_api/graphdb"
 	"cloudcord/user_api/models"
 	"cloudcord/user_api/mq"
 	"log"
@@ -118,6 +119,13 @@ func (ul *UserLogic) AddFriend(userID, friendID uint) error {
 		log.Printf("Failed to add friend: %v", err)
 		return err
 	}
+
+	err = graphdb.CreateFriendship(userID, friendID)
+	if err != nil {
+		log.Printf("Failed to sync friendship to Neo4j: %v", err)
+		return err
+	}
+
 	log.Printf("User %d and User %d are now friends", userID, friendID)
 	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"cloudcord/user_api/db"
+	"cloudcord/user_api/graphdb"
 	"cloudcord/user_api/logic"
 	"cloudcord/user_api/middleware"
 	"cloudcord/user_api/models"
@@ -255,6 +256,9 @@ func withCORS(next http.Handler) http.Handler {
 
 func main() {
 	db.Connect()
+
+	graphdb.InitNeo4j()
+	defer graphdb.CloseNeo4j()
 
 	repo := db.NewRepository(db.DB)
 
