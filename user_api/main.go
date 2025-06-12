@@ -257,14 +257,17 @@ func withCORS(next http.Handler) http.Handler {
 func main() {
 	db.Connect()
 
-	graphdb.InitNeo4j()
-	defer graphdb.CloseNeo4j()
+	err := graphdb.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect to Neo4j: %v", err)
+	}
+	defer graphdb.Close()
 
 	repo := db.NewRepository(db.DB)
 
 	middleware.InitMiddleware(repo)
 
-	err := models.MigrateAll(db.DB)
+	err = models.MigrateAll(db.DB)
 	if err != nil {
 		log.Fatal("could not migrate db")
 	}

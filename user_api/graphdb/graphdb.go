@@ -3,43 +3,28 @@ package graphdb
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
-	"github.com/joho/godotenv"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 var driver neo4j.DriverWithContext
 
-func InitNeo4j() {
-	err := godotenv.Load()
+func Connect() error {
+	var err error
+	driver, err = neo4j.NewDriverWithContext(
+		os.Getenv("NEO4J_URI"),
+		neo4j.BasicAuth(os.Getenv("NEO4J_USERNAME"), os.Getenv("NEO4J_PASSWORD"), ""),
+	)
 	if err != nil {
-		log.Println("No .env file found or error loading .env")
+		return err
 	}
-
-	uri := os.Getenv("NEO4J_URI")
-	username := os.Getenv("NEO4J_USERNAME")
-	password := os.Getenv("NEO4J_PASSWORD")
-
-	driver, err := neo4j.NewDriverWithContext(uri, neo4j.BasicAuth(username, password, ""))
-	if err != nil {
-		log.Fatalf("Failed to create Neo4j driver: %v", err)
-	}
-
-	err = driver.VerifyConnectivity(context.Background())
-	if err != nil {
-		log.Fatalf("Neo4j not reachable: %v", err)
-	}
-
-	log.Println("✅ Connected to Neo4j!")
+	return driver.VerifyConnectivity(context.Background())
 }
 
-func CloseNeo4j() {
-	if driver != nil {
-		driver.Close(context.Background())
-	}
+func Close() {
+	driver.Close(context.Background())
 }
 
 func CreateFriendship(userID, friendID uint) error {
