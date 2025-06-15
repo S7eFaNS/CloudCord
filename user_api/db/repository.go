@@ -66,3 +66,33 @@ func (r *Repository) DeleteUserByAuth0ID(auth0ID string) error {
 	result := r.DB.Where("auth0_id = ?", auth0ID).Delete(&models.User{})
 	return result.Error
 }
+
+func (r *Repository) AddFriend(userID, friendID uint) error {
+	if userID == friendID {
+		return nil
+	}
+
+	var count int64
+	r.DB.Model(&models.Friendship{}).Where("user_id = ? AND friend_id = ?", userID, friendID).Count(&count)
+	if count > 0 {
+		return nil
+	}
+
+	friendships := []models.Friendship{
+		{UserID: userID, FriendID: friendID},
+		{UserID: friendID, FriendID: userID},
+	}
+
+	return r.DB.Create(&friendships).Error
+}
+
+func (r *Repository) AreFriends(userID, otherUserID uint) (bool, error) {
+	var count int64
+	err := r.DB.Model(&models.Friendship{}).
+		Where("user_id = ? AND friend_id = ?", userID, otherUserID).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

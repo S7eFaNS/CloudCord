@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"cloudcord/user_api/graphdb"
 	"cloudcord/user_api/models"
 	"cloudcord/user_api/mq"
 	"log"
@@ -12,6 +13,8 @@ type UserRepository interface {
 	GetUserByID(id uint) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
 	DeleteUserByAuth0ID(auth0ID string) error
+	AddFriend(userID, friendID uint) error
+	AreFriends(userID, otherUserID uint) (bool, error)
 }
 
 type UserLogic struct {
@@ -63,6 +66,15 @@ func (ul *UserLogic) GetUserByIDHandler(id uint) (*models.User, error) {
 	return user, nil
 }
 
+func (ul *UserLogic) GetUserByAuth0ID(auth0ID string) (*models.User, error) {
+	user, err := ul.repo.GetUserByAuth0ID(auth0ID)
+	if err != nil {
+		log.Printf("Error retrieving user: %v", err)
+		return nil, err
+	}
+	return user, nil
+}
+
 func (ul *UserLogic) GetAllUsersHandler() ([]models.User, error) {
 	users, err := ul.repo.GetAllUsers()
 	if err != nil {
@@ -94,4 +106,67 @@ func (ul *UserLogic) DeleteUserByAuth0ID(auth0ID string) error {
 
 	log.Printf("Successfully deleted user with Auth0 ID: %s", auth0ID)
 	return nil
+}
+
+func (ul *UserLogic) AddFriend(userID, friendID uint) error {
+	if userID == friendID {
+		log.Printf("User %d cannot befriend themselves", userID)
+		return nil
+	}
+
+	err := ul.repo.AddFriend(userID, friendID)
+	if err != nil {
+		log.Printf("Failed to add friend: %v", err)
+		return err
+	}
+
+	err = graphdb.CreateFriendship(userID, friendID)
+	if err != nil {
+		log.Printf("Failed to sync friendship to Neo4j: %v", err)
+		return err
+	}
+
+	log.Printf("User %d and User %d are now friends", userID, friendID)
+	return nil
+}
+
+func (ul *UserLogic) AreFriends(userID, otherUserID uint) (bool, error) {
+	areFriends, err := ul.repo.AreFriends(userID, otherUserID)
+	if err != nil {
+		log.Printf("Error checking friendship status: %v", err)
+		return false, err
+	}
+	return areFriends, nil
+}
+
+func (ul *UserLogic) GetFriendRecommendations(userID uint) ([]models.UserRecommendation, error) {
+	_, err := ul.repo.GetUserByID(userID)
+	if err != nil {
+		log.Printf("User %d does not exist or could not be retrieved: %v", userID, err)
+		return nil, err
+	}
+
+	recs, err := graphdb.GetFriendRecommendations(userID)
+	if err != nil {
+		log.Printf("Failed to get friend recommendations from graphdb: %v", err)
+		return nil, err
+	}
+
+	var recommendations []models.UserRecommendation
+
+	for _, rec := range recs {
+		user, err := ul.repo.GetUserByID(rec.UserID)
+		if err != nil {
+			log.Printf("Failed to fetch user %d from PostgreSQL: %v", rec.UserID, err)
+			return nil, err
+		}
+
+		recommendations = append(recommendations, models.UserRecommendation{
+			ID:                user.UserID,
+			Username:          user.Username,
+			MutualFriendCount: rec.MutualFriendCount,
+		})
+	}
+
+	return recommendations, nil
 }
