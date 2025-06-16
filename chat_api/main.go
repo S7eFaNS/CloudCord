@@ -245,13 +245,10 @@ func main() {
 
 	chatService := logic.NewChatService(chatRepo, publisher)
 
-	messageMux := http.NewServeMux()
+	http.HandleFunc("/message/", handleOK)
 
-	messageMux.Handle("/", http.HandlerFunc(handleOK))
-	messageMux.Handle("/send", metricsMiddleware("/send", withCORS(sendMessageHandler(chatService))))
-	messageMux.Handle("/chat", metricsMiddleware("/chat", withCORS(getChatHandler(chatService))))
-
-	http.Handle("/message/", http.StripPrefix("/message", messageMux))
+	http.Handle("/message/send", metricsMiddleware("/message/send", withCORS(sendMessageHandler(chatService))))
+	http.Handle("/message/chat", metricsMiddleware("/message/chat", withCORS(getChatHandler(chatService))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

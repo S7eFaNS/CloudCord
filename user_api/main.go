@@ -318,19 +318,16 @@ func main() {
 
 	userLogic := logic.NewUserLogicRabbitMQ(repo, publisher)
 
-	userMux := http.NewServeMux()
+	http.HandleFunc("/user/", handleOK)
 
-	userMux.Handle("/", http.HandlerFunc(handleOK))
-	userMux.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
-	userMux.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
-	userMux.Handle("/auth-user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByAuth0ID)))
-	userMux.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
-	userMux.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
-	userMux.Handle("/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
-	userMux.Handle("/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
-	userMux.Handle("/recommendations", withCORS(middleware.ValidateJWT(handleFriendRecommendations(userLogic))))
-
-	http.Handle("/user/", http.StripPrefix("/user", userMux))
+	http.Handle("/user/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
+	http.Handle("/user/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
+	http.Handle("/user/auth-user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByAuth0ID)))
+	http.Handle("/user/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
+	http.Handle("/user/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
+	http.Handle("/user/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
+	http.Handle("/user/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
+	http.Handle("/user/recommendations", withCORS(middleware.ValidateJWT(handleFriendRecommendations(userLogic))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")
