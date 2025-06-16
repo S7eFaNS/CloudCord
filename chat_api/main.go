@@ -18,6 +18,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func handleOK(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
 var (
 	httpRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -150,7 +155,7 @@ func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		if origin == "http://localhost:3000" || origin == "https://cloudcord.com" {
+		if origin == "http://localhost:3000" || origin == "https://cloudcord.com" || origin == "https://cloudcord.info" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
@@ -240,8 +245,13 @@ func main() {
 
 	chatService := logic.NewChatService(chatRepo, publisher)
 
-	http.Handle("/send", metricsMiddleware("/send", withCORS(sendMessageHandler(chatService))))
-	http.Handle("/chat", metricsMiddleware("/chat", withCORS(getChatHandler(chatService))))
+	messageMux := http.NewServeMux()
+
+	messageMux.Handle("/", http.HandlerFunc(handleOK))
+	messageMux.Handle("/send", metricsMiddleware("/send", withCORS(sendMessageHandler(chatService))))
+	messageMux.Handle("/chat", metricsMiddleware("/chat", withCORS(getChatHandler(chatService))))
+
+	http.Handle("/message/", http.StripPrefix("/message", messageMux))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

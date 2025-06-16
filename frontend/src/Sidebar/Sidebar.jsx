@@ -7,7 +7,7 @@ import LogoutButton from '../LogoutButton'; // adjust the path if necessary
 import DeleteButton from '../DeleteButton';
 
   //const apiDevUrl = 'http://localhost:8081';
-  const apiProdUrl = 'https://cloudcord.com/user';
+  const apiProdUrl = 'https://cloudcord.info/user';
   
 
 const UserSidebar = () => {
