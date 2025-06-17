@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-api
+  template:
+    metadata:
+      labels:
+        app: notification-api
+    spec:
+      containers:
+        - name: notification-api
+          image: s7efan/notification-api:latest
+          ports:
+            - containerPort: 8083
+              name: http
+            - containerPort: 2112
+              name: metrics
+          env:
+            - name: RABBITMQ_URI
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_URI

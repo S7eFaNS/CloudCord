@@ -20,11 +20,8 @@ import (
 )
 
 func handleOK(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "200 Users! Current time is: %s", time.Now())
-
-	log.Printf("Request received: Method: %s, Path: %s, Headers: %v\n", r.Method, r.URL.Path, r.Header)
-
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 // user create api
@@ -262,7 +259,7 @@ func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		if origin == "http://localhost:3000" || origin == "https://cloudcord.com" {
+		if origin == "http://localhost:3000" || origin == "https://cloudcord.com" || origin == "https://cloudcord.info" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
@@ -321,15 +318,16 @@ func main() {
 
 	userLogic := logic.NewUserLogicRabbitMQ(repo, publisher)
 
-	http.Handle("/", middleware.ValidateJWT(http.HandlerFunc(handleOK)))
-	http.Handle("/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
-	http.Handle("/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
-	http.Handle("/auth-user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByAuth0ID)))
-	http.Handle("/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
-	http.Handle("/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
-	http.Handle("/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
-	http.Handle("/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
-	http.Handle("/recommendations", withCORS(middleware.ValidateJWT(handleFriendRecommendations(userLogic))))
+	http.HandleFunc("/", handleOK)
+
+	http.Handle("/user/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
+	http.Handle("/user/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))
+	http.Handle("/user/auth-user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByAuth0ID)))
+	http.Handle("/user/users", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleGetAllUsers))))
+	http.Handle("/user/delete", withCORS(middleware.ValidateJWT(handleDeleteUser(userLogic))))
+	http.Handle("/user/add-friend", withCORS(middleware.ValidateJWT(handleAddFriend(userLogic))))
+	http.Handle("/user/is-friend", withCORS(middleware.ValidateJWT(handleAreFriends(userLogic))))
+	http.Handle("/user/recommendations", withCORS(middleware.ValidateJWT(handleFriendRecommendations(userLogic))))
 
 	go func() {
 		fmt.Println("Starting metrics server on :2112...")

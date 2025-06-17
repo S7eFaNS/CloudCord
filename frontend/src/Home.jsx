@@ -8,8 +8,8 @@ const Home = () => {
   const [apiResponse, setApiResponse] = useState('');
 
   //const apiDevUrl = 'http://localhost:8081';
-  const apiProdUrl = 'https://cloudcord.com/user';
-  // Use a ref to track if we've already called the backend after login
+  const apiProdUrl = 'https://cloudcord.info/user';
+
   const calledBackendAfterLogin = useRef(false);
 
   useEffect(() => {

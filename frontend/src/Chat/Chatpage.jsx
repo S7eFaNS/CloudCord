@@ -17,7 +17,7 @@ const ChatPage = () => {
   useEffect(() => {
     const fetchChat = async () => {
       try {
-        const response = await fetch(`https://cloudcord.com/message/chat?user1=${user1}&user2=${user2}`);
+        const response = await fetch(`https://cloudcord.info/message/chat?user1=${user1}&user2=${user2}`);
         if (!response.ok) throw new Error('Failed to fetch chat');
         const data = await response.json();
         setMessages(data.messages ?? []);
@@ -37,7 +37,7 @@ const ChatPage = () => {
     try {
       const token = await getAccessTokenSilently();
 
-      const response = await fetch('https://cloudcord.com/message/send', {
+      const response = await fetch('https://cloudcord.info/message/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

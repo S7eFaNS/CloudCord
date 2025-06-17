@@ -1,19 +1,40 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-service-ingress
+  name: frontend-ingress
   annotations:
-    konghq.com/strip-path: "true"
+    kubernetes.io/ingress.class: "gce" 
+    networking.gke.io/managed-certificates: cloudcord-cert
+    networking.gke.io/v1beta1.FrontendConfig: ssl-redirect-config
 spec:
-  ingressClassName: kong
+  defaultBackend:
+    service:
+      name: frontend-service
+      port:
+        number: 80
   rules:
-    - host: cloudcord.com
+    - host: cloudcord.info
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend-service 
+                name: frontend-service
                 port:
                   number: 80
+          - path: /user
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8081
+
+          - path: /message
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-api-service
+                port:
+                  number: 8084
