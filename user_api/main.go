@@ -318,7 +318,7 @@ func main() {
 
 	userLogic := logic.NewUserLogicRabbitMQ(repo, publisher)
 
-	http.HandleFunc("/user/", handleOK)
+	http.HandleFunc("/", handleOK)
 
 	http.Handle("/user/create", withCORS(middleware.ValidateJWT(http.HandlerFunc(handleCreateUser))))
 	http.Handle("/user/user", middleware.ValidateJWT(http.HandlerFunc(handleGetUserByID)))

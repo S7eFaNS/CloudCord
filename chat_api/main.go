@@ -245,7 +245,7 @@ func main() {
 
 	chatService := logic.NewChatService(chatRepo, publisher)
 
-	http.HandleFunc("/message/", handleOK)
+	http.HandleFunc("/", handleOK)
 
 	http.Handle("/message/send", metricsMiddleware("/message/send", withCORS(sendMessageHandler(chatService))))
 	http.Handle("/message/chat", metricsMiddleware("/message/chat", withCORS(getChatHandler(chatService))))
