@@ -7,15 +7,14 @@ exports.friendAdded = (req, res) => {
     return res.status(204).send('');
   }
 
-  const { user_id, friend_id } = req.body;
+  const { friend_username } = req.body;
 
-  if (!user_id || !friend_id) {
-    return res.status(400).json({ error: 'Missing user_id or friend_id' });
+  if (!friend_username) {
+    return res.status(400).json({ error: 'Missing friend_username' });
   }
 
   return res.status(200).json({
-    notification: `User ${user_id} added ${friend_id} as a friend.`,
-    friend_id,
+    notification: `Added ${friend_username} as a friend.`,
   });
 };
 
