@@ -154,7 +154,22 @@ const handleToggleView = (viewName) => {
         throw new Error('Failed to add friend');
       }
 
-      alert('Friend added successfully!');
+    const friendAddedNotification = await fetch(
+      'https://us-central1-directed-sonar-461707-r8.cloudfunctions.net/friendAdded',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: currentUserId,
+          friend_id: friendUserId,
+        }),
+      }
+    );
+
+    const notifyData = await friendAddedNotification.json();
+    alert(notifyData.notification);
 
       setFriendStatuses(prev => ({ ...prev, [friendUserId]: true }));
       setRecommendations(prev => prev.filter(rec => rec.ID !== friendUserId));

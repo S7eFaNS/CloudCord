@@ -2,7 +2,6 @@ package logic
 
 import (
 	"cloudcord/chat_api/models"
-	"cloudcord/chat_api/mq"
 	"context"
 	"log"
 	"sort"
@@ -23,17 +22,15 @@ type Publisher interface {
 
 // ChatService depends on interfaces, not concrete types
 type ChatService struct {
-	repo            ChatRepository
-	publisher       Publisher
-	pubsubPublisher *mq.PubSubPublisher
+	repo      ChatRepository
+	publisher Publisher
 }
 
 // Constructor takes interfaces now
-func NewChatService(repo ChatRepository, publisher Publisher, pubsub *mq.PubSubPublisher) *ChatService {
+func NewChatService(repo ChatRepository, publisher Publisher) *ChatService {
 	return &ChatService{
-		repo:            repo,
-		publisher:       publisher,
-		pubsubPublisher: pubsub,
+		repo:      repo,
+		publisher: publisher,
 	}
 }
 
@@ -60,14 +57,6 @@ func (s *ChatService) SendMessageToUser(ctx context.Context, sender, receiver, c
 
 	if err := s.publisher.Publish(notification); err != nil {
 		log.Printf("Failed to publish notification: %v", err)
-	}
-
-	if s.pubsubPublisher != nil {
-		if err := s.pubsubPublisher.Publish(ctx, notification); err != nil {
-			log.Printf("❌ Failed to publish to Pub/Sub: %v", err)
-		} else {
-			log.Println("✅ Notification published to Pub/Sub")
-		}
 	}
 
 	return nil

@@ -227,18 +227,6 @@ func main() {
 		log.Fatalf("Failed to set up RabbitMQ publisher after retries: %v", err2)
 	}
 
-	gcpProjectID := os.Getenv("GCP_PROJECT_ID")
-	if gcpProjectID == "" {
-		log.Fatal("GCP_PROJECT_ID not set in environment")
-	}
-	pubsubTopic := "message.sent"
-
-	pubsubPublisher, err := mq.NewPubSubPublisher(context.Background(), gcpProjectID, pubsubTopic)
-	if err != nil {
-		log.Fatalf("❌ Failed to set up Pub/Sub publisher: %v", err)
-	}
-	log.Println("✅ Pub/Sub publisher set up successfully")
-
 	go func() {
 		maxRetries := 8
 		for i := 0; i < maxRetries; i++ {
@@ -255,7 +243,7 @@ func main() {
 		log.Fatal("❌ Failed to start user deletion consumer after retries")
 	}()
 
-	chatService := logic.NewChatService(chatRepo, publisher, pubsubPublisher)
+	chatService := logic.NewChatService(chatRepo, publisher)
 
 	http.HandleFunc("/", handleOK)
 

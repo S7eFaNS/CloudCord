@@ -56,6 +56,7 @@ const ChatPage = () => {
 
       setMessages(prev => [...prev, data.message]);
       setInput('');
+      
     } catch (error) {
       console.error('❌ Error sending message:', error);
     }

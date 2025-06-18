@@ -28,11 +28,6 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: RABBITMQ_URI
-            - name: GCP_PROJECT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: cloudcord-secrets
-                  key: GCP_PROJECT_ID
             - name: MONGODB_USER
               valueFrom:
                 secretKeyRef:
