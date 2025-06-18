@@ -52,7 +52,7 @@ func TestSendMessageToUser(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	sender := "alice"
 	receiver := "bob"
@@ -86,7 +86,7 @@ func TestSendMessageToUser_AddMessageFails(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	sender := "alice"
 	receiver := "bob"
@@ -114,7 +114,7 @@ func TestSendMessageToUser_PublishFails(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	sender := "alice"
 	receiver := "bob"
@@ -147,7 +147,7 @@ func TestGetChatByUsers(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	user1 := "alice"
 	user2 := "bob"
@@ -176,7 +176,7 @@ func TestGetChatByUsers_RepoFails(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	user1 := "alice"
 	user2 := "bob"
@@ -198,7 +198,7 @@ func TestCreateChat(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	user1 := "alice"
 	user2 := "bob"
@@ -225,7 +225,7 @@ func TestCreateChat_RepoFails(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	user1 := "alice"
 	user2 := "bob"
@@ -246,7 +246,7 @@ func TestDeleteChatsByAuth0ID(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	auth0ID := "auth0|123456"
 
@@ -264,7 +264,7 @@ func TestDeleteChatsByAuth0ID_RepoFails(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockPub := new(MockPublisher)
 
-	service := logic.NewChatService(mockRepo, mockPub)
+	service := logic.NewChatService(mockRepo, mockPub, nil)
 
 	auth0ID := "auth0|fail-case"
 
