@@ -5,6 +5,7 @@ package main
 
 import (
 	"cloudcord/user_api/db"
+	"cloudcord/user_api/handlers"
 	"cloudcord/user_api/logic"
 	"cloudcord/user_api/middleware"
 	"cloudcord/user_api/models"
@@ -36,7 +37,7 @@ func TestGetAllUsersIntegration(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(handleGetAllUsers)
+	handler := http.HandlerFunc(handlers.HandleGetAllUsers)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
@@ -72,7 +73,7 @@ func TestGetUserByIDIntegration(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(handleGetUserByID)
+	handler := http.HandlerFunc(handlers.HandleGetUserByID)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
@@ -104,7 +105,7 @@ func TestGetUserByID_NotFound(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/user?id=999999", nil)
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(handleGetUserByID)
+	handler := http.HandlerFunc(handlers.HandleGetUserByID)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusNotFound {
@@ -124,7 +125,7 @@ func TestHandleCreateUser(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(handleCreateUser)
+	handler := http.HandlerFunc(handlers.HandleCreateUser)
 	handler.ServeHTTP(rr, req)
 
 	t.Logf("Response body: %s", rr.Body.String())
@@ -173,7 +174,7 @@ func TestDeleteUser_Auth0NotFoundHandledGracefully(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	userLogic := logic.NewUserLogic(repo)
-	handler := handleDeleteUser(userLogic)
+	handler := handlers.HandleDeleteUser(userLogic)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
