@@ -6,6 +6,7 @@ package main
 import (
 	"bytes"
 	"cloudcord/chat_api/db"
+	"cloudcord/chat_api/handlers"
 	"cloudcord/chat_api/logic"
 	"cloudcord/chat_api/models"
 	"cloudcord/chat_api/mq"
@@ -72,7 +73,7 @@ func TestSendMessageHandler_Integration(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 
-	handler := sendMessageHandler(chatService)
+	handler := handlers.SendMessageHandler(chatService)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
@@ -107,7 +108,7 @@ func TestGetChatHandler_Integration(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/get?user1=%s&user2=%s", user1, user2), nil)
 	rr := httptest.NewRecorder()
 
-	handler := getChatHandler(chatService)
+	handler := handlers.GetChatHandler(chatService)
 	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
