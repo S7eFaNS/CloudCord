@@ -1,6 +1,8 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router';
 import { useAuth0 } from '@auth0/auth0-react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Home from './Home';
 import Login from './Login/Login';
 import ChatPage from './Chat/Chatpage'
@@ -13,7 +15,7 @@ function App() {
   return (
     <div>
       {isAuthenticated}
-
+      <ToastContainer />
       <Routes>
         <Route
           path="/"

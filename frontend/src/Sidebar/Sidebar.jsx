@@ -1,4 +1,5 @@
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useAuth0 } from '@auth0/auth0-react';
 import './Sidebar.css';
 import { Link } from 'react-router-dom';
@@ -153,8 +154,39 @@ const handleToggleView = (viewName) => {
       if (!response.ok) {
         throw new Error('Failed to add friend');
       }
+    const friend = users.find(u => u.user_id === friendUserId);
+    const friendUsername = friend ? friend.username : 'Unknown User';
+    
+    const friendAddedNotification = await fetch(
+      'https://us-central1-directed-sonar-461707-r8.cloudfunctions.net/friendAdded',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          friend_username: friendUsername,
+        }),
+      }
+    );
 
-      alert('Friend added successfully!');
+    if (!friendAddedNotification.ok) {
+      throw new Error('Friend added notification request failed');
+    }
+
+    const notifyData = await friendAddedNotification.json();;
+
+    toast.success(notifyData.notification, {
+      position: 'top-right',
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'dark',
+    });
+
 
       setFriendStatuses(prev => ({ ...prev, [friendUserId]: true }));
       setRecommendations(prev => prev.filter(rec => rec.ID !== friendUserId));
